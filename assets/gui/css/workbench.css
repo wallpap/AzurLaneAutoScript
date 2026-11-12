@@ -124,10 +124,10 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: #7d6ed1; }
 #pywebio-scope-scheduler-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: transparent; border: 0; margin: 0; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
 #pywebio-scope-scheduler-bar > p { margin: 0 !important; font-size: 12px; color: var(--muted); }
 #pywebio-scope-scheduler_btn { flex-shrink: 0; }
-#pywebio-scope-overview-body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr); gap: 24px; min-height: 0; }
+#pywebio-scope-overview-body { display: grid; grid-template-columns: minmax(280px, .8fr) minmax(0, 2fr); gap: 24px; min-height: 0; }
 #pywebio-scope-schedulers { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 20px; min-height: 0; height: 100%; overflow: hidden; }
 #pywebio-scope-running { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto; align-items: center; gap: 16px; margin: 0; padding: 12px 16px; border: 1px solid var(--line); border-left: 3px solid #56b998; border-radius: 6px; background: var(--surface); min-height: 60px; max-height: none; }
-#pywebio-scope-task-queues { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; min-height: 0; }
+#pywebio-scope-task-queues { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(100px, .35fr); gap: 20px; min-height: 0; }
 #pywebio-scope-pending, #pywebio-scope-waiting { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 0; background: transparent; border: 0; border-radius: 0; margin: 0; padding: 0; min-height: 0; max-height: none; }
 #pywebio-scope-running-heading, #pywebio-scope-pending-heading, #pywebio-scope-waiting-heading { display: flex; align-items: center; gap: 8px; }
 #pywebio-scope-pending-heading, #pywebio-scope-waiting-heading { padding: 0 0 12px; border-bottom: 1px solid var(--line); }
@@ -205,8 +205,8 @@ body #input-container.fixed, body.webio-theme-dark #input-container.fixed { box-
 .ws-form-submit-btns .btn[type="reset"], .ws-form-submit-btns .pywebio_cancel_btn { background: var(--field); border-color: var(--line); color: var(--text); }
 @media (max-width: 1280px) {
     #pywebio-scope-content { padding: 20px 24px; }
-    #pywebio-scope-overview-body { grid-template-columns: minmax(0, 1.2fr) minmax(260px, 1fr); gap: 16px; }
-    #pywebio-scope-task-queues { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(100px, .4fr); overflow: hidden; }
+    #pywebio-scope-overview-body { grid-template-columns: 280px minmax(0, 1fr); gap: 16px; }
+
 
     #pywebio-scope-home-main { gap: 24px; }
     #pywebio-scope-home-configurations-list { grid-template-columns: minmax(0, 1fr); }
