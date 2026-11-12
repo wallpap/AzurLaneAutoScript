@@ -3013,6 +3013,20 @@
     }
   },
   "Gui": {
+    "Workbench": {
+      "UpdateDescription": "Compare local and upstream versions, and check for available updates.",
+      "LogEmpty": "Start the scheduler to see activity here.",
+      "Title": "Workspace",
+      "Description": "Choose a configuration in the sidebar to get started. Adjust language and appearance here.",
+      "Language": "Interface language",
+      "Appearance": "Appearance",
+      "Light": "Light",
+      "Dark": "Dark",
+      "About": "About Alas",
+      "FreeSoftware": "Alas is free and open source. If you paid for this software, please request a refund.",
+      "Repository": "View project repository",
+      "ManageDescription": "Manage independent configurations, import existing settings, or export a backup."
+    },
     "Aside": {
       "Install": "Install",
       "Home": "Home",

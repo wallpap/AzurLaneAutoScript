@@ -3013,6 +3013,20 @@
     }
   },
   "Gui": {
+    "Workbench": {
+      "UpdateDescription": "查看目前版本與上游版本，檢查並安裝可用更新。",
+      "LogEmpty": "啟動排程器後，執行記錄將顯示於此。",
+      "Title": "工作台",
+      "Description": "從左側選擇設定檔開始使用，在這裡調整語言與外觀。",
+      "Language": "介面語言",
+      "Appearance": "外觀",
+      "Light": "淺色",
+      "Dark": "深色",
+      "About": "關於 Alas",
+      "FreeSoftware": "Alas 是免費開源軟體。如果你透過任何管道付費購買，請申請退款。",
+      "Repository": "前往專案儲存庫",
+      "ManageDescription": "管理獨立的執行設定檔，也可以匯入既有設定或匯出備份。"
+    },
     "Aside": {
       "Install": "安裝",
       "Home": "主頁",

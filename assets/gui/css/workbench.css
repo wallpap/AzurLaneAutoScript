@@ -30,6 +30,7 @@ body.alas-dark {
     --field: #191f2b;
     color-scheme: dark;
 }
+.markdown-body { color: var(--text); font-family: inherit; font-size: 14px; line-height: 1.6; }
 * { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
 ::-webkit-scrollbar { width: 7px; height: 7px; }
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
@@ -66,7 +67,7 @@ body.alas-dark {
 }
 .btn-aside { width: 60px; border-radius: 6px; padding: 32px 0 4px 0; font-size: 11px; color: var(--muted); }
 .btn-aside:hover, .btn-aside-active {
-    background: var(--accent-soft); color: var(--accent); border-left: 0; padding-left: 0;
+    background: rgba(125, 110, 209, .15); color: var(--accent); border-left: 0; padding-left: 0;
 }
 .aside-icon { width: 24px; height: 24px; }
 .aside-icon > path { fill: var(--muted); }
@@ -85,19 +86,20 @@ details[open] > div { margin-left: 8px; }
     margin: 0 0 16px; padding: 22px 24px;
 }
 [id^="pywebio-scope-group_"] > p { color: var(--text); font-size: 17px; font-weight: 600; }
-*[style*="--arg-help--"], [id^="pywebio-scope-group_"] > p + p { color: var(--muted); font-size: 12px; line-height: 1.65; }
+*[style*="--arg-help--"], [id^="pywebio-scope-group_"] > p + p { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.65; }
 *[style*="--arg-title--"] { font-size: 14px; color: var(--text); }
 [id^="pywebio-scope-arg_container-"] { grid-template-columns: minmax(0, 1fr) minmax(160px, 34%); gap: 12px 24px; margin: 14px 0; align-items: start; }
-[id^="pywebio-scope-arg_container-textarea-"] { grid-template-columns: minmax(0, 1fr); }
+[id^="pywebio-scope-arg_contianer-textarea-"] { grid-template-columns: minmax(0, 1fr); }
 .form-control, .bootstrap-select > select {
     background-color: var(--field); color: var(--text); border: 1px solid var(--line);
     border-radius: 5px !important; padding: 7px 10px; min-height: 36px;
 }
 .bootstrap-select > select { padding: 7px 28px 7px 10px !important; }
+.bootstrap-select.form-control { padding: 0; border: 0; background: transparent; }
 .form-control:focus { background-color: var(--field); color: var(--text); border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-soft); }
 .form-control.is-invalid { border-color: #dc3545; }
 input[type="checkbox"] { width: 18px; height: 18px; accent-color: #7d6ed1; }
-.CodeMirror, .CodeMirror-gutters { background: var(--field); color: var(--text); }
+.CodeMirror, .CodeMirror-gutters { background: var(--field) !important; color: var(--text) !important; }
 .CodeMirror-wrap, textarea { border: 1px solid var(--line); border-radius: 5px; }
 .state > select { border: 0; background: transparent; }
 .state-bold > select { color: var(--accent); }
@@ -106,12 +108,13 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: #7d6ed1; }
 .btn-navigator { background: transparent; color: var(--muted); font-size: 12px; padding: 7px 10px; }
 .btn-navigator:hover { background: var(--accent-soft); color: var(--accent); }
 #pywebio-scope-overview { grid-template-columns: minmax(300px, 36%) minmax(0, 1fr); gap: 20px; overflow: hidden; }
-#pywebio-scope-schedulers { grid-template-rows: auto auto minmax(160px, 1fr) minmax(140px, 1fr); gap: 14px; min-height: 0; }
+#pywebio-scope-schedulers { grid-template-rows: auto auto minmax(160px, 1fr) minmax(120px, auto); gap: 14px; min-height: 0; }
 #pywebio-scope-running, #pywebio-scope-pending, #pywebio-scope-waiting,
 #pywebio-scope-scheduler-bar, #pywebio-scope-log-bar, #pywebio-scope-log {
     background: var(--surface); border: 1px solid var(--line); border-radius: 8px; margin: 0; padding: 16px; min-height: 0;
 }
 #pywebio-scope-running { max-height: 200px; }
+#pywebio-scope-waiting { max-height: min(28vh, 240px); }
 #pywebio-scope-running > p, #pywebio-scope-pending > p, #pywebio-scope-waiting > p { font-size: 15px; font-weight: 600; margin: 0 !important; }
 #pywebio-scope-scheduler-bar > p, #pywebio-scope-log-bar > p { font-size: 15px !important; font-weight: 600; margin: 0 !important; }
 #pywebio-scope-running_tasks, #pywebio-scope-pending_tasks, #pywebio-scope-waiting_tasks { min-height: 0; height: auto; }
@@ -121,33 +124,40 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: #7d6ed1; }
 *[style*="--overview-notask-text--"] { color: var(--muted); padding: 8px; margin: 0; }
 #pywebio-scope-logs { min-width: 0; min-height: 0; gap: 14px; overflow: hidden; }
 #pywebio-scope-log { background: var(--field); overflow: auto; font-size: 12px; }
+#pywebio-scope-log > div:empty::before { content: attr(data-empty); color: var(--muted); white-space: normal; display: block; padding: 24px 8px; text-align: center; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; }
 .container-log { background: var(--field) !important; border-color: var(--line); }
 #pywebio-scope-updater_info, #pywebio-scope-updater_detail, #pywebio-scope-config_table { overflow-x: auto; }
-table.table { color: var(--text); background: var(--surface); font-size: 13px; margin-bottom: 0; }
-.table td, .table th { border-color: var(--line); padding: 12px 16px; vertical-align: middle; }
-.table thead th { background: var(--field); color: var(--muted); font-size: 12px; font-weight: 600; }
-.table-striped tbody tr:nth-of-type(odd) { background: var(--surface); }
-.table-striped tbody tr:nth-of-type(even) { background: var(--field); }
-.table tbody tr:hover { background: var(--surface-hover); }
+#pywebio-scope-content table { display: table; width: 100%; color: var(--text); background: var(--surface); font-size: 13px; margin-bottom: 0; }
+#pywebio-scope-content table td, #pywebio-scope-content table th { border-color: var(--line); padding: 12px 16px; vertical-align: middle; }
+#pywebio-scope-content table th { background: var(--field); color: var(--muted); font-size: 12px; font-weight: 600; }
+#pywebio-scope-content table tr { background: var(--surface); border-color: var(--line); }
+#pywebio-scope-content table tr:nth-child(2n) { background: var(--field); }
+#pywebio-scope-content table tr:hover { background: var(--surface-hover); }
 #pywebio-scope-updater_info, #pywebio-scope-updater_detail { margin-top: 20px; }
 #pywebio-scope-updater_detail > p { font-weight: 600; }
 #pywebio-scope-updater_info td, #pywebio-scope-updater_detail td { white-space: nowrap; }
 #pywebio-scope-updater_info td:last-child, #pywebio-scope-updater_detail td:last-child { white-space: normal; min-width: 240px; overflow-wrap: anywhere; }
 #pywebio-scope-updater_btn { margin-top: 12px; }
 #pywebio-scope-home-page, #pywebio-scope-manage-page { max-width: 960px; margin: 8px auto; }
-.page-heading { font-size: 26px; font-weight: 600; letter-spacing: -.5px; margin: 0 0 8px; }
-.page-description { color: var(--muted); margin: 0 0 28px; font-size: 14px; }
-.preference-section { padding: 24px 0; border-top: 1px solid var(--line); }
-.preference-section h2 { font-size: 16px; font-weight: 600; margin: 0 0 14px; }
-.preference-section p { color: var(--muted); margin-bottom: 12px; }
-.preference-section .btn { margin: 0 8px 8px 0; }
-.btn.preference-selected { background: var(--accent-soft); border-color: var(--accent); color: var(--accent); }
-.project-note { padding: 20px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
-.project-note p { margin: 0 0 6px; }
-.project-note a { color: var(--accent); }
+.markdown-body .page-heading { font-size: 26px; font-weight: 600; letter-spacing: -.5px; margin: 0 0 8px; border: 0; padding: 0; }
+.markdown-body .page-description { color: var(--muted); margin: 0 0 28px; font-size: 14px; }
+[id^="pywebio-scope-preference-"] { padding: 24px 0; border-top: 1px solid var(--line); }
+[id^="pywebio-scope-preference-"] h2, #pywebio-scope-home-about h2 { font-size: 16px; font-weight: 600; margin: 0 0 14px; padding: 0; border: 0; color: var(--text); }
+[id^="pywebio-scope-preference-"] p { color: var(--muted); margin-bottom: 12px; }
+[id^="pywebio-scope-preference-"] .btn { margin: 0 8px 8px 0; }
+#pywebio-scope-home-about { padding: 20px 0; border-top: 1px solid var(--line); color: var(--muted); font-size: 12px; }
+#pywebio-scope-home-about p { margin: 0 0 6px; }
+#pywebio-scope-home-about a { color: var(--accent); }
 .alas-manage #pywebio-scope-menu { display: none; }
 #pywebio-scope-manage-actions { margin: 0 0 20px; }
 .modal-content, .modal-body { background: var(--surface); color: var(--text); border-color: var(--line); }
+body #input-container, body.webio-theme-dark #input-container { background: var(--canvas); border-top: 1px solid var(--line); }
+body #input-container.fixed, body.webio-theme-dark #input-container.fixed { box-shadow: 0 -8px 24px rgba(0, 0, 0, .12); }
+#input-cards { max-width: 720px; }
+#input-cards .card { background: var(--surface); color: var(--text); border: 1px solid var(--line); border-radius: 8px; }
+#input-cards .card-header { background: var(--surface); color: var(--text); border-bottom: 1px solid var(--line); font-size: 16px; font-weight: 600; }
+#input-cards label { color: var(--text); }
+.ws-form-submit-btns .btn[type="reset"], .ws-form-submit-btns .pywebio_cancel_btn { background: var(--field); border-color: var(--line); color: var(--text); }
 @media (max-width: 1100px) {
     #pywebio-scope-content { padding: 16px; }
     #pywebio-scope-_groups { grid-template-columns: minmax(0, 1fr); }

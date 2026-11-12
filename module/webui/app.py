@@ -478,6 +478,8 @@ class AlasGUI(Frame):
                 ],
             )
             put_scope("log", [put_html("")])
+            run_js("$('#pywebio-scope-log > div').attr('data-empty', message)",
+                   message=t("Gui.Workbench.LogEmpty"))
 
         log.console.width = log.get_width()
 
@@ -784,6 +786,8 @@ class AlasGUI(Frame):
     def dev_update(self) -> None:
         self.init_menu(name="Update")
         self.set_title(t("Gui.MenuDevelop.Update"))
+        put_html(f'<h1 class="page-heading">{t("Gui.MenuDevelop.Update")}</h1>')
+        put_html(f'<p class="page-description">{t("Gui.Workbench.UpdateDescription")}</p>')
 
         if State.restart_event is None:
             put_warning(t("Gui.Update.DisabledWarn"))
@@ -795,6 +799,7 @@ class AlasGUI(Frame):
 
         put_scope("updater_btn")
         put_scope("updater_info")
+        put_collapse(t("Gui.Update.DetailedHistory"), [put_scope("updater_detail")])
 
         def update_table():
             with use_scope("updater_info", clear=True):
@@ -816,7 +821,6 @@ class AlasGUI(Frame):
                     ],
                 )
             with use_scope("updater_detail", clear=True):
-                put_text(t("Gui.Update.DetailedHistory"))
                 history = updater.get_commit(
                     f"origin/{updater.Branch}", n=20, short_sha1=True
                 )
@@ -837,9 +841,7 @@ class AlasGUI(Frame):
             clear("updater_state")
             clear("updater_btn")
             if state == 0:
-                put_loading("border", "secondary", "updater_loading").style(
-                    "--loading-border-fill--"
-                )
+                put_text("✓", scope="updater_loading").style("color: #56b998; font-size: 1.25rem")
                 put_text(t("Gui.Update.UpToDate"), scope="updater_state")
                 put_button(
                     t("Gui.Button.CheckUpdate"),
@@ -1152,33 +1154,39 @@ class AlasGUI(Frame):
             run_js("location.reload()")
 
         with use_scope("content"):
-            put_text("Select your language / 选择语言").style("text-align: center")
-            put_buttons(
-                [
-                    {"label": "简体中文", "value": "zh-CN"},
-                    {"label": "繁體中文", "value": "zh-TW"},
-                    {"label": "English", "value": "en-US"},
-                    {"label": "日本語", "value": "ja-JP"},
-                ],
-                onclick=lambda l: set_language(l),
-            ).style("text-align: center")
-            put_text("Change theme / 更改主题").style("text-align: center")
-            put_buttons(
-                [
-                    {"label": "Light", "value": "default", "color": "light"},
-                    {"label": "Dark", "value": "dark", "color": "dark"},
-                ],
-                onclick=lambda t: set_theme(t),
-            ).style("text-align: center")
-
-            # show something
-            put_markdown(
-                """
-            Alas is a free open source software, if you paid for Alas from any channel, please refund.
-            Alas 是一款免费开源软件，如果你在任何渠道付费购买了Alas，请退款。
-            Project repository 项目地址：`https://github.com/LmeSzinc/AzurLaneAutoScript`
-            """
-            ).style("text-align: center")
+            put_scope("home-page")
+        with use_scope("home-page"):
+            put_html(f'<h1 class="page-heading">{t("Gui.Workbench.Title")}</h1>')
+            put_html(f'<p class="page-description">{t("Gui.Workbench.Description")}</p>')
+            with use_scope("preference-language"):
+                put_html(f'<h2>{t("Gui.Workbench.Language")}</h2>')
+                put_buttons(
+                    [
+                        {"label": label, "value": value,
+                         "color": "on" if lang.LANG == value else "off"}
+                        for label, value in [("简体中文", "zh-CN"), ("繁體中文", "zh-TW"),
+                                             ("English", "en-US"), ("日本語", "ja-JP")]
+                    ],
+                    onclick=set_language,
+                )
+            with use_scope("preference-theme"):
+                put_html(f'<h2>{t("Gui.Workbench.Appearance")}</h2>')
+                put_buttons(
+                    [
+                        {"label": t("Gui.Workbench.Light"), "value": "default",
+                         "color": "off" if self.theme == "dark" else "on"},
+                        {"label": t("Gui.Workbench.Dark"), "value": "dark",
+                         "color": "on" if self.theme == "dark" else "off"},
+                    ],
+                    onclick=set_theme,
+                )
+            with use_scope("home-about"):
+                put_html(f'<h2>{t("Gui.Workbench.About")}</h2>')
+                put_text(t("Gui.Workbench.FreeSoftware"))
+                put_link(t("Gui.Workbench.Repository"),
+                         url="https://github.com/LmeSzinc/AzurLaneAutoScript", new_window=True)
+        run_js("document.querySelectorAll('[id^=pywebio-scope-preference-] .btn').forEach("
+               "button => button.setAttribute('aria-pressed', button.classList.contains('btn-on')))")
 
         if lang.TRANSLATE_MODE:
             lang.reload()
@@ -1373,7 +1381,7 @@ def app_manage():
                     get_config_mod(name),
                     put_buttons(
                         buttons=[
-                            {"label": t("Gui.AppManage.Export"), "value": name},
+                            {"label": t("Gui.AppManage.Export"), "value": name, "color": "off"},
                             # {
                             #     "label": t("Gui.AppManage.Delete"),
                             #     "value": name,
@@ -1400,10 +1408,27 @@ def app_manage():
         )
 
     set_env(title="Alas", output_animation=False)
-    run_js("$('head').append('<style>.footer{display:none}</style>')")
-
-    put_html(f"<h2>{t('Gui.AppManage.PageTitle')}</h2>")
-    put_scope("config_table")
+    apply_gui_styles(State.theme, info.user_agent.is_mobile)
+    Frame._show()
+    Frame.set_title(t("Gui.AppManage.PageTitle"))
+    run_js("document.body.classList.add('alas-manage')")
+    with use_scope("aside"):
+        put_icon_buttons(
+            Icon.DEVELOP,
+            buttons=[{"label": t("Gui.Aside.Home"), "value": "Home", "color": "aside"}],
+            onclick=[partial(go_app, "index", new_window=False)],
+        )
+        put_icon_buttons(
+            Icon.SETTING,
+            buttons=[{"label": t("Gui.AddAlas.Manage"), "value": "AddAlas", "color": "aside"}],
+            onclick=[lambda: None],
+        )
+    Frame.active_button("aside", "AddAlas")
+    put_scope("manage-page", scope="content")
+    put_html(f'<h1 class="page-heading">{t("Gui.AppManage.PageTitle")}</h1>', scope="manage-page")
+    put_html(f'<p class="page-description">{t("Gui.Workbench.ManageDescription")}</p>', scope="manage-page")
+    put_scope("manage-actions", scope="manage-page")
+    put_scope("config_table", scope="manage-page")
     put_buttons(
         buttons=[
             {
@@ -1411,14 +1436,15 @@ def app_manage():
                 "value": "new",
                 "disabled": IS_ON_PHONE_CLOUD,
             },
-            {"label": t("Gui.AppManage.Import"), "value": "import"},
-            {"label": t("Gui.AppManage.Back"), "value": "back"},
+            {"label": t("Gui.AppManage.Import"), "value": "import", "color": "off"},
+            {"label": t("Gui.AppManage.Back"), "value": "back", "color": "off"},
         ],
         onclick=[
             (lambda: None) if IS_ON_PHONE_CLOUD else _new,
             _import,
             partial(go_app, "index", new_window=False),
         ],
+        scope="manage-actions",
     )
     _show_table()
 

@@ -1,6 +1,20 @@
 # Translations web gui
 # This will insert to `config/i18n/{lang}.json`, under key `Gui`
 
+Workbench:
+  Title:
+  Description:
+  Language:
+  Appearance:
+  Light:
+  Dark:
+  About:
+  FreeSoftware:
+  Repository:
+  ManageDescription:
+  LogEmpty:
+  UpdateDescription:
+
 Aside:
   Install:
   Home:

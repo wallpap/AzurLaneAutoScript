@@ -3013,6 +3013,20 @@
     }
   },
   "Gui": {
+    "Workbench": {
+      "UpdateDescription": "現在のバージョンと上流のバージョンを確認し、利用可能な更新をチェックします。",
+      "LogEmpty": "スケジューラーを開始すると、ここに実行ログが表示されます。",
+      "Title": "ワークスペース",
+      "Description": "サイドバーから設定を選択して開始します。言語と外観はここで変更できます。",
+      "Language": "表示言語",
+      "Appearance": "外観",
+      "Light": "ライト",
+      "Dark": "ダーク",
+      "About": "Alas について",
+      "FreeSoftware": "Alas は無料のオープンソースソフトウェアです。有料で購入された場合は返金を申請してください。",
+      "Repository": "プロジェクトのリポジトリ",
+      "ManageDescription": "実行設定の管理、既存設定のインポート、バックアップのエクスポートができます。"
+    },
     "Aside": {
       "Install": "インストール",
       "Home": "Gui.Aside.Home",

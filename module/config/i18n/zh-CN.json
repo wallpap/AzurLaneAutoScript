@@ -3013,6 +3013,20 @@
     }
   },
   "Gui": {
+    "Workbench": {
+      "UpdateDescription": "查看当前版本与上游版本，检查并安装可用更新。",
+      "LogEmpty": "启动调度器后，运行日志将在这里显示。",
+      "Title": "工作台",
+      "Description": "从左侧选择配置开始使用，在这里调整语言与外观。",
+      "Language": "界面语言",
+      "Appearance": "外观",
+      "Light": "浅色",
+      "Dark": "深色",
+      "About": "关于 Alas",
+      "FreeSoftware": "Alas 是免费开源软件。如果你通过任何渠道付费购买，请申请退款。",
+      "Repository": "访问项目仓库",
+      "ManageDescription": "管理独立的运行配置，也可以导入已有配置或导出备份。"
+    },
     "Aside": {
       "Install": "安装",
       "Home": "主页",
