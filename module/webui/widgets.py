@@ -5,7 +5,7 @@ import string
 from typing import Any, Callable, Dict, Generator, List, Optional, TYPE_CHECKING, Union
 
 from pywebio.exceptions import SessionException
-from pywebio.io_ctrl import Output
+from pywebio.io_ctrl import Output, output_register_callback
 from pywebio.output import *
 from pywebio.session import eval_js, local, run_js
 from rich.console import ConsoleRenderable
@@ -88,10 +88,7 @@ class RichLog:
             highlighter=Highlighter(),
             theme=WEB_THEME,
         )
-        # self.callback_id = output_register_callback(
-        #     self._callback_set_width, serial_mode=True)
-        # self._callback_thread = None
-        # self._width = 80
+        self._requested_width = None
         self.keep_bottom = True
         if State.theme == "dark":
             self.terminal_theme = DARK_TERMINAL_THEME
@@ -157,46 +154,55 @@ class RichLog:
         width = eval_js(js)
         return 80 if width is None else 128 if width > 128 else int(width)
 
-    # def _register_resize_callback(self):
-    #     js = """
-    #     WebIO.pushData(
-    #         ($('#pywebio-scope-log').width()-16)/$('#pywebio-scope-log').css('font-size').slice(0, -2)/0.55,
-    #         {callback_id}
-    #     )""".format(callback_id=self.callback_id)
+    def _observe_width(self):
+        def resized(width):
+            self._requested_width = max(20, min(128, int(width)))
 
-    # def _callback_set_width(self, width):
-    #     self._width = width
-    #     if self._callback_thread is None:
-    #         self._callback_thread = Thread(target=self._callback_width_checker)
-    #         self._callback_thread.start()
+        callback_id = output_register_callback(resized, serial_mode=True)
+        run_js("""
+            if (window.alasLogResizeObserver) window.alasLogResizeObserver.disconnect();
+            const element = document.getElementById(scopeId);
+            let timer, lastWidth;
+            const observer = new ResizeObserver(() => {
+                clearTimeout(timer);
+                timer = setTimeout(() => {
+                    if (!element.isConnected) { observer.disconnect(); return; }
+                    const canvas = document.createElement('canvas');
+                    const context = canvas.getContext('2d');
+                    const style = getComputedStyle(element);
+                    context.font = `${style.fontSize} Menlo, consolas, DejaVu Sans Mono, Courier New, monospace`;
+                    const width = Math.max(20, Math.min(128, Math.floor((element.clientWidth - 16) / context.measureText('0').width)));
+                    if (width !== lastWidth) { lastWidth = width; WebIO.pushData(width, callbackId); }
+                }, 150);
+            });
+            observer.observe(element);
+            window.alasLogResizeObserver = observer;
+        """, scopeId=f"pywebio-scope-{self.scope}", callbackId=callback_id)
 
-    # def _callback_width_checker(self):
-    #     last_modify = time.time()
-    #     _width = self._width
-    #     while True:
-    #         if time.time() - last_modify > 1:
-    #             break
-    #         if self._width == _width:
-    #             time.sleep(0.1)
-    #             continue
-    #         else:
-    #             _width = self._width
-    #             last_modify = time.time()
-
-    #     self._callback_thread = None
-    #     self.console.width = int(_width)
+    def replace(self, text):
+        # 只在日志换行宽度变化或历史轮转时替换日志，保留用户阅读位置。
+        run_js("const element = document.getElementById(scopeId);"
+               "const top = element.scrollTop;"
+               "element.firstElementChild.innerHTML = text;"
+               "element.scrollTop = follow ? element.scrollHeight : top;",
+               scopeId=f"pywebio-scope-{self.scope}", text=text, follow=self.keep_bottom)
 
     def put_log(self, pm: ProcessManager) -> Generator:
+        self._observe_width()
         yield
         try:
             while True:
                 last_idx = len(pm.renderables)
                 html = "".join(map(self.render, pm.renderables[:]))
-                self.reset()
-                self.extend(html)
+                self.replace(html)
                 counter = last_idx
                 while counter < pm.renderables_max_length * 2:
                     yield
+                    if self._requested_width is not None and self._requested_width != self.console.width:
+                        self.console.width = self._requested_width
+                        renderables = pm.renderables[:]
+                        last_idx = len(renderables)
+                        self.replace("".join(map(self.render, renderables)))
                     idx = len(pm.renderables)
                     if idx < last_idx:
                         last_idx -= pm.renderables_reduce_length

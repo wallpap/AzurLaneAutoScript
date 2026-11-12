@@ -30,6 +30,7 @@ from pywebio.output import (
     put_loading,
     put_markdown,
     put_row,
+    remove,
     put_scope,
     put_table,
     put_text,
@@ -57,7 +58,7 @@ from module.logger import logger
 from module.ocr.rpc import start_ocr_server_process, stop_ocr_server_process
 from module.submodule.submodule import load_config
 from module.submodule.utils import get_config_mod
-from module.webui.base import Frame
+from module.webui.base import Frame, render_view
 from module.webui.discord_presence import close_discord_rpc, init_discord_rpc
 from module.webui.fastapi import asgi_app
 from module.webui.lang import _t, t
@@ -524,6 +525,8 @@ class AlasGUI(Frame):
 
         self.task_handler.add(switch_scheduler.g(), 1, True)
         self.task_handler.add(switch_log_scroll.g(), 1, True)
+        self._overview_task_cache = {}
+        self.alas_update_overview_task()
         self.task_handler.add(self.alas_update_overview_task, 10, True)
         self.task_handler.add(log.put_log(self.alas), 0.25, True)
 
@@ -628,39 +631,45 @@ class AlasGUI(Frame):
             running = []
             pending = []
         waiting = self.alas_config.waiting_task
-        for name, tasks in (("pending", pending), ("waiting", waiting)):
-            with use_scope(f"{name}-count", clear=True):
-                put_text(str(len(tasks)))
-
-        def put_task(func: Function):
-            with use_scope(f"overview-task_{func.command}"):
-                put_button(
-                    label=f"{t(f'Task.{func.command}.name')}\n{func.next_run}",
-                    onclick=partial(self.alas_set_group, func.command),
-                    color="task",
-                )
-
-        clear("running_tasks")
-        clear("pending_tasks")
-        clear("waiting_tasks")
-        with use_scope("running_tasks"):
-            if running:
-                for task in running:
-                    put_task(task)
-            else:
-                put_text(t("Gui.Overview.NoTask")).style("--overview-notask-text--")
-        with use_scope("pending_tasks"):
-            if pending:
-                for task in pending:
-                    put_task(task)
-            else:
-                put_text(t("Gui.Overview.NoTask")).style("--overview-notask-text--")
-        with use_scope("waiting_tasks"):
-            if waiting:
-                for task in waiting:
-                    put_task(task)
-            else:
-                put_text(t("Gui.Overview.NoTask")).style("--overview-notask-text--")
+        for status, tasks in (("running", running), ("pending", pending), ("waiting", waiting)):
+            current = [(task.command, str(task.next_run)) for task in tasks]
+            previous = self._overview_task_cache.get(status)
+            if current == previous:
+                continue
+            scope = f"{status}_tasks"
+            old = dict(previous or [])
+            new = dict(current)
+            for command in old.keys() - new.keys():
+                remove(f"overview-task_{status}_{command}")
+            if previous is None or len(current) != len(previous):
+                if status != "running":
+                    with use_scope(f"{status}-count", clear=True):
+                        put_text(str(len(tasks)))
+            empty_scope = f"overview-empty_{status}"
+            if current and not previous:
+                remove(empty_scope)
+            if not current and previous != []:
+                with use_scope(scope):
+                    put_scope(empty_scope, [put_text(t("Gui.Overview.NoTask"))
+                              .style("--overview-notask-text--")])
+            for command, next_run in current:
+                if old.get(command) == next_run:
+                    continue
+                with use_scope(scope):
+                    with use_scope(f"overview-task_{status}_{command}", clear=True):
+                        put_button(
+                            label=f"{t(f'Task.{command}.name')}\n{next_run}",
+                            onclick=partial(self.alas_set_group, command),
+                            color="task",
+                        )
+            # 仅顺序变化时移动已有节点，保留未变任务的焦点与滚动位置。
+            if [item[0] for item in current] != [item[0] for item in previous or []]:
+                run_js("const parent = document.getElementById(parentId);"
+                       "ids.forEach(id => { const node = document.getElementById(id);"
+                       "if (node) parent.appendChild(node); });",
+                       parentId=f"pywebio-scope-{scope}",
+                       ids=[f"pywebio-scope-overview-task_{status}_{command}" for command, _ in current])
+            self._overview_task_cache[status] = current
 
     @use_scope("content", clear=True)
     def alas_daemon_overview(self, task: str) -> None:
@@ -1010,6 +1019,7 @@ class AlasGUI(Frame):
     def ui_develop(self) -> None:
         self.show()
 
+    @render_view
     def ui_alas(self, config_name: str) -> None:
         if config_name == self.alas_name:
             self.expand_menu()
@@ -1024,6 +1034,7 @@ class AlasGUI(Frame):
         self.initial()
         self.alas_set_menu()
 
+    @render_view
     def ui_manage(self) -> None:
         close_popup()
         self.init_aside(expand_menu=False, name="AddAlas")
@@ -1122,9 +1133,13 @@ class AlasGUI(Frame):
                 put_button(t("Gui.Workbench.OpenConfiguration"),
                            onclick=partial(self.ui_alas, name), color="off")
 
-    def show(self) -> None:
-        self._show()
-        self.load_home = True
+    @render_view
+    def show(self, refresh_navigation=False) -> None:
+        first_render = not getattr(self, "_frame_ready", False)
+        if first_render:
+            self._show()
+            self._frame_ready = True
+        self.load_home = first_render or refresh_navigation
         # Create state_switch before rendering aside buttons, so that
         # ui_alas() (invoked by clicking aside buttons, possibly before
         # the rest of show() finishes on slow machines) never touches an
@@ -1138,7 +1153,8 @@ class AlasGUI(Frame):
                 get_state=lambda: getattr(getattr(self, "alas", -1), "state", 0),
                 name="state",
             )
-        self.set_aside()
+        if first_render or refresh_navigation:
+            self.set_aside()
         self.init_aside(name="Home")
         self.dev_set_menu()
         self.init_menu(name="HomePage")
@@ -1147,10 +1163,11 @@ class AlasGUI(Frame):
         if hasattr(self, "alas"):
             del self.alas
         self.set_status(0)
+        self.set_title(t("Gui.Aside.Home"))
 
         def set_language(l):
             lang.set_language(l)
-            self.show()
+            self.show(refresh_navigation=True)
 
         def set_theme(t):
             self.set_theme(t)

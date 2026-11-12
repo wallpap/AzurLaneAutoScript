@@ -1,8 +1,33 @@
+from functools import wraps
+
 from pywebio.output import clear, put_button, put_html, put_scope, put_text, use_scope
-from pywebio.session import defer_call, info, run_js
+from pywebio.session import defer_call, eval_js, info, run_js
 
 from module.webui.lang import t
 from module.webui.utils import Icon, WebIOTaskHandler, set_localstorage
+
+
+def render_view(func):
+    @wraps(func)
+    def wrapped(self, *args, **kwargs):
+        # 保留上一帧，待服务端本次视图输出完成后一起呈现，避免逐条输出造成闪屏。
+        transition = eval_js("""new Promise(resolve => {
+            if (!document.startViewTransition || !document.getElementById('pywebio-scope-content')) {
+                resolve(false); return;
+            }
+            const view = document.startViewTransition(() => new Promise(finish => {
+                const timer = setTimeout(finish, 4000);
+                window.alasFinishView = () => { clearTimeout(timer); finish(); delete window.alasFinishView; };
+                resolve(true);
+            }));
+            view.ready.catch(() => resolve(false));
+        })""")
+        try:
+            return func(self, *args, **kwargs)
+        finally:
+            if transition:
+                run_js("if (window.alasFinishView) window.alasFinishView()")
+    return wrapped
 
 
 class Base:
