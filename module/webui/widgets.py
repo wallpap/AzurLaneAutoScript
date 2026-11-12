@@ -438,12 +438,12 @@ def put_arg_checkbox(kwargs: T_Output_Kwargs) -> Output:
     value: str = kwargs["value"]
     _: str = kwargs.pop("invalid_feedback", None)
 
-    kwargs["options"] = [{"label": "", "value": True, "selected": value}]
+    kwargs["options"] = [{"label": kwargs.get("title", name), "value": True, "selected": value}]
     return put_scope(
         f"arg_container-checkbox-{name}",
         [
             get_title_help(kwargs),
-            put_checkbox(**kwargs).style("text-align: center"),
+            put_checkbox(**kwargs),
         ],
     )
 

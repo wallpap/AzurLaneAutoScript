@@ -51,7 +51,7 @@ class Frame(Base):
         """
         self.visible = True
         self.page = name
-        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view')")
+        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view', 'tool-view')")
         self.task_handler.remove_pending_task()
         clear("content")
         if collapse_menu:
@@ -62,7 +62,7 @@ class Frame(Base):
     @staticmethod
     @use_scope("ROOT", clear=True)
     def _show() -> None:
-        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view', 'alas-manage', 'navigation-open')")
+        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view', 'tool-view', 'alas-manage', 'navigation-open')")
         put_scope(
             "header",
             [

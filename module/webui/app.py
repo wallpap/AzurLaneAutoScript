@@ -215,7 +215,7 @@ class AlasGUI(Frame):
         if state == 1:
             put_loading_text(t("Gui.Status.Running"), color="success")
         elif state == 2:
-            put_loading_text(t("Gui.Status.Inactive"), color="secondary", fill=True)
+            put_text(t("Gui.Status.Inactive")).style("margin: 0; color: var(--muted);")
         elif state == 3:
             put_loading_text(t("Gui.Status.Warning"), shape="grow", color="warning")
         elif state == 4:
@@ -337,11 +337,7 @@ class AlasGUI(Frame):
         """
         self.init_menu(name=task)
         run_js("document.body.classList.add('settings-view')")
-        self.set_title(t(f"Task.{task}.name"))
-        put_scope("settings-heading", [
-            put_text(self.alas_name).style("--context-name--"),
-            put_html(f'<h1 class="page-heading">{escape(t(f"Task.{task}.name"))}</h1>'),
-        ])
+        self.set_title(f"{self.alas_name} / {t(f'Task.{task}.name')}")
         put_scope("_groups", [put_scope("navigator"), put_scope("groups")])
 
         task_help: str = t(f"Task.{task}.help")
@@ -460,47 +456,26 @@ class AlasGUI(Frame):
     def alas_overview(self) -> None:
         self.init_menu(name="Overview")
         run_js("document.body.classList.add('overview-view')")
-        self.set_title(t(f"Gui.MenuAlas.Overview"))
+        self.set_title(f"{self.alas_name} / {t('Gui.MenuAlas.Overview')}")
         put_scope("overview", [put_scope("scheduler-bar"), put_scope("overview-body", [
             put_scope("schedulers"), put_scope("logs"),
         ])])
         with use_scope("scheduler-bar"):
-            put_scope(
-                "overview-heading",
-                [
-                    put_text(self.alas_name).style("--context-name--"),
-                    put_html(f'<h1 class="page-heading">{t("Gui.MenuAlas.Overview")}</h1>'),
-                    put_text(t("Gui.Workbench.OverviewDescription")).style("--section-description--"),
-                ],
-            )
-            put_scope("overview-actions", [
-                put_scope("overview-state"), put_scope("scheduler_btn"),
-            ])
+            put_text(t("Gui.Workbench.OverviewDescription")).style("--section-description--")
+            put_scope("scheduler_btn")
+        put_scope("task-queues", [put_scope("pending"), put_scope("waiting")], scope="schedulers")
         with use_scope("schedulers"):
-            put_scope(
-                "running",
-                [
-                    put_scope("running-heading", [put_text(t("Gui.Overview.Running")), put_scope("running-count")]),
-                    put_html('<hr class="hr-group">'),
-                    put_scope("running_tasks"),
-                ],
-            )
-            put_scope(
-                "pending",
-                [
-                    put_scope("pending-heading", [put_text(t("Gui.Overview.Pending")), put_scope("pending-count")]),
-                    put_html('<hr class="hr-group">'),
-                    put_scope("pending_tasks"),
-                ],
-            )
-            put_scope(
-                "waiting",
-                [
-                    put_scope("waiting-heading", [put_text(t("Gui.Overview.Waiting")), put_scope("waiting-count")]),
-                    put_html('<hr class="hr-group">'),
-                    put_scope("waiting_tasks"),
-                ],
-            )
+            put_scope("running", [
+                put_scope("running-heading", [put_text(t("Gui.Overview.Running"))]),
+                put_scope("running_tasks"),
+            ], position=0)
+        for status in ("pending", "waiting"):
+            with use_scope(status):
+                put_scope(f"{status}-heading", [
+                    put_text(t("Gui.Overview.Pending" if status == "pending" else "Gui.Overview.Waiting")),
+                    put_scope(f"{status}-count"),
+                ])
+                put_scope(f"{status}_tasks")
 
         switch_scheduler = BinarySwitchButton(
             label_on=t("Gui.Button.Stop"),
@@ -653,11 +628,9 @@ class AlasGUI(Frame):
             running = []
             pending = []
         waiting = self.alas_config.waiting_task
-        for name, tasks in (("running", running), ("pending", pending), ("waiting", waiting)):
+        for name, tasks in (("pending", pending), ("waiting", waiting)):
             with use_scope(f"{name}-count", clear=True):
                 put_text(str(len(tasks)))
-        with use_scope("overview-state", clear=True):
-            put_text(t("Gui.Status.Running" if self.alas.alive else "Gui.Status.Inactive"))
 
         def put_task(func: Function):
             with use_scope(f"overview-task_{func.command}"):
@@ -699,47 +672,22 @@ class AlasGUI(Frame):
     @use_scope("content", clear=True)
     def alas_daemon_overview(self, task: str) -> None:
         self.init_menu(name=task)
-        self.set_title(t(f"Task.{task}.name"))
+        self.set_title(f"{self.alas_name} / {t(f'Task.{task}.name')}")
 
         log = RichLog("log")
 
-        if self.is_mobile:
-            put_scope(
-                "daemon-overview",
-                [
-                    put_scope("scheduler-bar"),
-                    put_scope("groups"),
-                    put_scope("log-bar"),
-                    put_scope("log", [put_html("")]),
-                ],
-            )
-        else:
-            put_scope(
-                "daemon-overview",
-                [
-                    put_none(),
-                    put_scope(
-                        "_daemon",
-                        [
-                            put_scope(
-                                "_daemon_upper",
-                                [put_scope("scheduler-bar"), put_scope("log-bar")],
-                            ),
-                            put_scope("groups"),
-                            put_scope("log", [put_html("")]),
-                        ],
-                    ),
-                    put_none(),
-                ],
-            )
-
+        run_js("document.body.classList.add('tool-view')")
+        put_scope("daemon-overview", [
+            put_scope("tool-body", [
+                put_scope("groups"),
+                put_scope("logs", [put_scope("log-bar"), put_scope("log", [put_html("")])]),
+            ]),
+        ])
+        run_js("$('#pywebio-scope-log > div').attr('data-empty', message)",
+               message=t("Gui.Workbench.LogEmpty"))
         log.console.width = log.get_width()
 
-        with use_scope("scheduler-bar"):
-            put_text(t("Gui.Overview.Scheduler")).style(
-                "font-size: 1.25rem; margin: auto .5rem auto;"
-            )
-            put_scope("scheduler_btn")
+        put_scope("scheduler_btn", scope="log-bar")
 
         switch_scheduler = BinarySwitchButton(
             label_on=t("Gui.Button.Stop"),
@@ -779,23 +727,6 @@ class AlasGUI(Frame):
             if group[0] == "Storage":
                 continue
             self.set_group(group, arg_dict, config, task)
-
-        run_js(
-            """
-            $("#pywebio-scope-log").css(
-                "grid-row-start",
-                -2 - $("#pywebio-scope-_daemon").children().filter(
-                    function(){
-                        return $(this).css("display") === "none";
-                    }
-                ).length
-            );
-            $("#pywebio-scope-log").css(
-                "grid-row-end",
-                -1
-            );
-        """
-        )
 
         self.task_handler.add(switch_scheduler.g(), 1, True)
         self.task_handler.add(switch_log_scroll.g(), 1, True)

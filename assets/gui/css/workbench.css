@@ -1,4 +1,5 @@
 /* 公共视觉层最后加载，浅色与深色使用同一套布局和控件。 */
+html, body { width: 100%; height: 100%; overflow: hidden; }
 body {
     --canvas: #f3f5f9;
     --surface: #ffffff;
@@ -36,7 +37,7 @@ body.alas-dark {
 ::-webkit-scrollbar-thumb { background: var(--line); border-radius: 8px; }
 ::-webkit-scrollbar-track { background: transparent; }
 /* 单侧导航承载工作空间与当前工作区目录，正文拥有独立滚动区域。 */
-#pywebio-scope-ROOT { min-height: 0; grid-template-rows: 56px minmax(0, 1fr); }
+#pywebio-scope-ROOT { height: 100dvh; min-height: 0; grid-template-rows: 56px minmax(0, 1fr); }
 #pywebio-scope-header {
     background: var(--surface); border-bottom: 1px solid var(--line);
     box-shadow: none; grid-template-columns: 48px 184px minmax(0, 1fr) auto !important;
@@ -55,7 +56,7 @@ body.alas-dark {
 #pywebio-scope-aside_instance { max-height: 28vh; overflow-y: auto; }
 #pywebio-scope-menu { background: transparent; width: auto; padding: 18px 12px; border: 0; border-top: 1px solid var(--line); box-shadow: none; overflow: visible; }
 *[style*="--navigation-label--"] { font-size: 11px; font-weight: 600; color: var(--muted); padding: 0 12px; margin: 0 0 12px !important; }
-#pywebio-scope-content { background: var(--canvas); padding: 32px 36px; min-width: 0; min-height: 0; }
+#pywebio-scope-content { background: var(--canvas); padding: 20px 24px; min-width: 0; min-height: 0; }
 .btn { font-size: 14px; border-radius: 6px; padding: 8px 14px; font-weight: 500; }
 .btn-primary, .btn-info, .btn-on {
     background: #6e61c5; border: 1px solid #6e61c5; color: #ffffff;
@@ -68,8 +69,9 @@ body.alas-dark {
 .btn:focus-visible, summary:focus-visible, a:focus-visible {
     outline: 2px solid var(--accent); outline-offset: 3px;
 }
-.btn-aside { width: 100%; border-radius: 6px; padding: 9px 12px 9px 40px; font-size: 13px; text-align: left; color: var(--muted); }
-.btn-aside:hover, .btn-aside-active { background: var(--accent-soft); color: var(--accent); border: 0; padding: 9px 12px 9px 40px; font-weight: 600; }
+.btn-aside { display: flex; align-items: center; width: 100%; min-height: 40px; margin: 0; border: 0; border-radius: 6px; padding: 10px 12px 10px 40px; font-size: 13px; line-height: 20px; text-align: left; color: var(--muted); }
+.btn-aside:hover { background: var(--surface-hover); color: var(--text); }
+.btn-aside-active, .btn-aside-active:hover { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 *[style*="--workspace-entry:"] { position: relative; align-items: center; margin-bottom: 4px; grid-template-columns: minmax(0, 1fr) !important; }
 *[style*="--workspace-icon:"] { position: absolute; left: 12px; width: 20px; z-index: 3; pointer-events: none; }
 *[style*="--workspace-icon:"] > div { height: 20px; }
@@ -84,18 +86,17 @@ details[open] > div { margin-left: 8px; padding-left: 8px; border-left: 1px soli
 #task-search-empty { color: var(--muted); font-size: 12px; padding: 12px; }
 [hidden] { display: none !important; }
 .hr-group { height: 1px; border: 0; background: var(--line) !important; margin: 12px 0 !important; }
-.settings-view #pywebio-scope-content { display: grid; grid-template-rows: auto minmax(0, 1fr); overflow: hidden; }
-#pywebio-scope-settings-heading { margin-bottom: 20px; }
+.settings-view #pywebio-scope-content { display: grid; grid-template-rows: minmax(0, 1fr); overflow: hidden; }
 *[style*="--context-name--"] { color: var(--accent); font-weight: 600; font-size: 12px; margin: 0 0 6px !important; }
 *[style*="--section-description--"] { color: var(--muted); font-size: 13px; margin: 8px 0 0 !important; }
-#pywebio-scope-_groups { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 0; max-width: 1100px; width: 100%; height: 100%; margin: 0 auto; min-height: 0; }
+#pywebio-scope-_groups { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 0; max-width: none; width: 100%; height: 100%; margin: 0; min-height: 0; }
 #pywebio-scope-groups { min-width: 0; min-height: 0; padding: 8px 8px 32px 0; overflow-y: auto; }
-[id^="pywebio-scope-group_"] { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; padding: 28px 8px; }
+[id^="pywebio-scope-group_"] { background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; padding: 20px 4px; }
 [id^="pywebio-scope-group_"] > p { color: var(--text); font-size: 17px; font-weight: 600; margin-left: 0 !important; }
 *[style*="--arg-help--"], [id^="pywebio-scope-group_"] > p + p { color: var(--muted); font-size: 12px; font-weight: 400; line-height: 1.65; }
 *[style*="--arg-title--"] { font-size: 14px; color: var(--text); }
-[id^="pywebio-scope-group_"] > .hr-group { display: none; }
-[id^="pywebio-scope-arg_container-"] { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) minmax(200px, 36%); gap: 12px 40px; margin: 24px 0 0; align-items: start; }
+[id^="pywebio-scope-group_"] > .hr-group { display: none !important; }
+[id^="pywebio-scope-arg_container-"] { grid-template-rows: auto; grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) minmax(200px, 36%); gap: 12px 32px; margin: 20px 0 0; align-items: start; }
 [id^="pywebio-scope-arg_contianer-textarea-"] { margin-top: 24px; }
 .form-control, .bootstrap-select > select {
     background-color: var(--field); color: var(--text); border: 1px solid var(--line);
@@ -114,35 +115,51 @@ input[type="checkbox"] { width: 18px; height: 18px; accent-color: #7d6ed1; }
 #pywebio-scope-navigator { display: flex; flex-wrap: wrap; gap: 4px; background: transparent; border: 0; border-bottom: 1px solid var(--line); margin: 0; padding: 0 0 12px; height: auto; max-width: none; }
 .btn-navigator { background: transparent; color: var(--muted); font-size: 12px; padding: 7px 12px; border-radius: 5px; }
 .btn-navigator:hover, .btn-navigator:focus { background: var(--accent-soft); color: var(--accent); }
-/* 总览：全宽操作栏，任务状态列与日志并排，日志保持真实内容容器。 */
-.overview-view #pywebio-scope-content { overflow: hidden; }
-#pywebio-scope-overview { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 28px; height: 100%; overflow: hidden; }
-#pywebio-scope-scheduler-bar { display: flex; align-items: center; justify-content: space-between; gap: 24px; background: transparent; border: 0; border-radius: 0; margin: 0; padding: 0; }
-#pywebio-scope-overview-actions { display: flex; align-items: center; gap: 18px; flex-shrink: 0; }
-#pywebio-scope-overview-state { color: var(--muted); font-size: 12px; }
-#pywebio-scope-overview-state > p { margin: 0; }
-#pywebio-scope-overview-state > p::before { content: ""; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: var(--muted); margin-right: 7px; vertical-align: middle; }
-#pywebio-scope-overview-body { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(280px, 1fr); gap: 28px; min-height: 0; }
-#pywebio-scope-schedulers { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); grid-template-rows: minmax(0, 1fr); gap: 12px; height: 100%; min-height: 0; overflow: hidden; }
-#pywebio-scope-running, #pywebio-scope-pending, #pywebio-scope-waiting { display: grid; grid-template-rows: auto 1px minmax(0, 1fr); gap: 12px; background: transparent; border: 0; border-radius: 0; margin: 0; padding: 0 4px; min-height: 0; max-height: none; }
-#pywebio-scope-running-heading, #pywebio-scope-pending-heading, #pywebio-scope-waiting-heading { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+/* 当前任务独占紧凑行；长队列使用横向列表，日志与配置各有独立区域。 */
+.overview-view #pywebio-scope-content, .tool-view #pywebio-scope-content { overflow: hidden; }
+#pywebio-scope-overview, #pywebio-scope-daemon-overview {
+    display: grid; grid-auto-flow: row; grid-template-columns: minmax(0, 1fr);
+    grid-template-rows: auto minmax(0, 1fr); gap: 16px; height: 100%; min-height: 0; overflow: hidden;
+}
+#pywebio-scope-scheduler-bar { display: flex; align-items: center; justify-content: space-between; gap: 16px; background: transparent; border: 0; margin: 0; padding: 0 0 14px; border-bottom: 1px solid var(--line); }
+#pywebio-scope-scheduler-bar > p { margin: 0 !important; font-size: 12px; color: var(--muted); }
+#pywebio-scope-scheduler_btn { flex-shrink: 0; }
+#pywebio-scope-overview-body { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(320px, 1fr); gap: 24px; min-height: 0; }
+#pywebio-scope-schedulers { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 20px; min-height: 0; height: 100%; overflow: hidden; }
+#pywebio-scope-running { display: grid; grid-template-columns: auto minmax(0, 1fr); grid-template-rows: auto; align-items: center; gap: 16px; margin: 0; padding: 12px 16px; border: 1px solid var(--line); border-left: 3px solid #56b998; border-radius: 6px; background: var(--surface); min-height: 60px; max-height: none; }
+#pywebio-scope-task-queues { display: grid; grid-template-columns: minmax(0, 1.5fr) minmax(0, 1fr); gap: 20px; min-height: 0; }
+#pywebio-scope-pending, #pywebio-scope-waiting { display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: auto minmax(0, 1fr); gap: 0; background: transparent; border: 0; border-radius: 0; margin: 0; padding: 0; min-height: 0; max-height: none; }
+#pywebio-scope-running-heading, #pywebio-scope-pending-heading, #pywebio-scope-waiting-heading { display: flex; align-items: center; gap: 8px; }
+#pywebio-scope-pending-heading, #pywebio-scope-waiting-heading { padding: 0 0 12px; border-bottom: 1px solid var(--line); }
 #pywebio-scope-running-heading > p, #pywebio-scope-pending-heading > p, #pywebio-scope-waiting-heading > p { margin: 0; font-size: 13px; font-weight: 600; }
-[id$="-count"] > p { font-size: 11px; color: var(--muted); background: var(--surface-hover); border-radius: 5px; min-width: 22px; text-align: center; padding: 0 5px; margin: 0; }
-#pywebio-scope-running > .hr-group { background: #56b998 !important; }
-#pywebio-scope-pending > .hr-group { background: #8b7bd7 !important; }
-#pywebio-scope-waiting > .hr-group { background: #b7935f !important; }
-#pywebio-scope-schedulers .hr-group { margin: 0 !important; }
-#pywebio-scope-running_tasks, #pywebio-scope-pending_tasks, #pywebio-scope-waiting_tasks { overflow-y: auto; min-height: 0; height: auto; padding-right: 4px; }
-[id^="pywebio-scope-overview-task_"] { display: grid; grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); gap: 14px; background: var(--surface); border: 1px solid var(--line); border-radius: 7px; margin: 0 0 10px; padding: 14px 12px; }
-[id^="pywebio-scope-overview-task_"] .btn { width: 100%; font-size: 11px; padding: 5px 10px; background: transparent; }
-[id^="pywebio-scope-overview-task_"] *[style*="--arg-help--"] { font-size: 11px; margin-top: 6px !important; }
-*[style*="--overview-notask-text--"] { color: var(--muted); padding: 24px 8px; margin: 0; font-size: 12px; text-align: center; border: 1px dashed var(--line); border-radius: 6px; }
+[id$="-count"] > p { font-size: 11px; color: var(--muted); background: var(--surface-hover); border-radius: 4px; min-width: 20px; text-align: center; padding: 0 4px; margin: 0; }
+#pywebio-scope-running_tasks, #pywebio-scope-pending_tasks, #pywebio-scope-waiting_tasks { overflow-y: auto; min-height: 0; height: auto; padding: 0; }
+[id^="pywebio-scope-overview-task_"] { display: grid; grid-auto-flow: row; grid-template-columns: minmax(0, 1fr) auto; align-items: center; gap: 12px; background: transparent; border: 0; border-bottom: 1px solid var(--line); border-radius: 0; margin: 0; padding: 12px 0; }
+[id^="pywebio-scope-overview-task_"] .btn { width: auto; font-size: 11px; padding: 4px 10px; background: transparent; }
+[id^="pywebio-scope-overview-task_"] *[style*="--arg-help--"] { font-size: 11px; margin-top: 3px !important; }
+#pywebio-scope-running [id^="pywebio-scope-overview-task_"] { padding: 0; border: 0; }
+*[style*="--overview-notask-text--"] { color: var(--muted); padding: 16px 0; margin: 0; font-size: 12px; border: 0; text-align: left; }
+#pywebio-scope-running *[style*="--overview-notask-text--"] { padding: 0; }
+#pywebio-scope-daemon-overview { grid-template-rows: minmax(0, 1fr); }
+.tool-view #pywebio-scope-log-bar > p { order: -1; margin-right: auto !important; }
+.tool-view #pywebio-scope-log-bar { gap: 12px; }
+.tool-view #pywebio-scope-log-bar #pywebio-scope-scheduler_btn .btn { background: #6e61c5; color: #fff; border-color: #6e61c5; padding: 6px 12px; font-size: 13px; }
+#pywebio-scope-tool-body { display: grid; grid-template-columns: minmax(320px, .9fr) minmax(0, 1.1fr); gap: 24px; min-height: 0; }
+#pywebio-scope-tool-body #pywebio-scope-groups { background: transparent; border: 0; padding: 0 16px 16px 0; }
+#pywebio-scope-tool-body [id^="pywebio-scope-group_"] { background: transparent; border: 0; padding: 4px 0 24px; }
+#pywebio-scope-tool-body [id^="pywebio-scope-arg_container-"] { grid-template-columns: minmax(0, 1fr); gap: 8px; }
+[id^="pywebio-scope-arg_container-checkbox-"], #pywebio-scope-tool-body [id^="pywebio-scope-arg_container-checkbox-"] { grid-template-columns: minmax(0, 1fr) 36px; grid-template-rows: auto; align-items: start; gap: 12px; }
+[id^="pywebio-scope-arg_container-checkbox-"] .form-group { justify-self: end; }
+[id^="pywebio-scope-arg_container-checkbox-"] .form-check { padding: 0; width: 32px; min-height: 32px; }
+[id^="pywebio-scope-arg_container-checkbox-"] .form-check-label { font-size: 0; line-height: 0; display: flex; align-items: center; justify-content: center; width: 32px; height: 32px; cursor: pointer; }
+[id^="pywebio-scope-arg_container-checkbox-"] .form-check-input { position: static; margin: 0; width: 18px; height: 18px; cursor: pointer; }
+
 #pywebio-scope-logs { display: grid; grid-template-rows: auto minmax(0, 1fr); grid-template-columns: minmax(0, 1fr); gap: 12px; min-width: 0; min-height: 0; overflow: hidden; }
 #pywebio-scope-log-bar { display: flex; align-items: center; justify-content: space-between; background: transparent; border: 0; border-radius: 0; margin: 0; padding: 0 0 12px; border-bottom: 1px solid var(--line); }
 #pywebio-scope-log-bar > p { font-size: 13px !important; font-weight: 600; margin: 0 !important; }
 #pywebio-scope-log-bar .btn { font-size: 11px; padding: 3px 8px; background: var(--surface); color: var(--muted); border-color: var(--line); }
 #pywebio-scope-log { background: var(--field); border: 1px solid var(--line); border-radius: 7px; margin: 0; padding: 16px; overflow: auto; min-height: 0; font-size: 12px; }
-#pywebio-scope-log > div:empty::before { content: attr(data-empty); color: var(--muted); white-space: normal; display: block; padding: 48px 8px; text-align: center; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; }
+#pywebio-scope-log > div:empty::before { content: attr(data-empty); color: var(--muted); white-space: normal; display: block; padding: 12px 0; text-align: left; font-family: "Segoe UI", "Microsoft YaHei UI", sans-serif; }
 .container-log { background: var(--field) !important; border-color: var(--line); }
 #pywebio-scope-updater_info, #pywebio-scope-updater_detail, #pywebio-scope-config_table { overflow-x: auto; }
 #pywebio-scope-content table { display: table; width: 100%; color: var(--text); background: var(--surface); font-size: 13px; margin-bottom: 0; }
@@ -187,22 +204,24 @@ body #input-container.fixed, body.webio-theme-dark #input-container.fixed { box-
 #input-cards label { color: var(--text); }
 .ws-form-submit-btns .btn[type="reset"], .ws-form-submit-btns .pywebio_cancel_btn { background: var(--field); border-color: var(--line); color: var(--text); }
 @media (max-width: 1280px) {
-    #pywebio-scope-content { padding: 28px; }
-    #pywebio-scope-overview-body { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(280px, 1fr) minmax(180px, .65fr); }
+    #pywebio-scope-content { padding: 20px 24px; }
+    #pywebio-scope-overview-body { grid-template-columns: minmax(0, 1.2fr) minmax(260px, 1fr); gap: 16px; }
+    #pywebio-scope-task-queues { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) minmax(100px, .4fr); overflow: hidden; }
+
     #pywebio-scope-home-main { gap: 24px; }
     #pywebio-scope-home-configurations-list { grid-template-columns: minmax(0, 1fr); }
 }
 @media (max-width: 1000px) {
     #pywebio-scope-contents { grid-template-columns: 212px minmax(0, 1fr); }
     #pywebio-scope-header { grid-template-columns: 48px 156px minmax(0, 1fr) auto !important; }
-    #pywebio-scope-content { padding: 24px; }
+    #pywebio-scope-content { padding: 16px; }
     #pywebio-scope-home-main { grid-template-columns: minmax(0, 1fr); margin-top: 28px; }
     #pywebio-scope-home-configurations-list { grid-template-columns: repeat(2, minmax(0, 1fr)); }
     #pywebio-scope-home-preferences { border-left: 0; border-top: 1px solid var(--line); padding: 24px 0 0; }
-    [id^="pywebio-scope-arg_container-"] { grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); gap: 12px; }
+    [id^="pywebio-scope-arg_container-"] { grid-template-rows: auto; grid-auto-flow: row; grid-template-columns: minmax(0, 1fr); gap: 12px; }
     [id^="pywebio-scope-arg_container-checkbox-"] { grid-template-columns: minmax(0, 1fr) auto; }
     #pywebio-scope-scheduler-bar { align-items: flex-start; }
-    #pywebio-scope-overview-state { display: none; }
+
 }
 @media (max-width: 760px) {
     #pywebio-scope-contents { grid-template-columns: minmax(0, 1fr); }
@@ -217,6 +236,9 @@ body #input-container.fixed, body.webio-theme-dark #input-container.fixed { box-
     #pywebio-scope-menu, .alas-manage #pywebio-scope-menu { display: block; }
     #pywebio-scope-content, .alas-mobile #pywebio-scope-content { padding: 24px 18px; }
     .settings-view #pywebio-scope-content { display: block; overflow: auto; }
+    .tool-view #pywebio-scope-content { overflow: auto; }
+    #pywebio-scope-daemon-overview { display: block; height: auto; overflow: visible; }
+    #pywebio-scope-tool-body { display: block; margin-top: 20px; }
     #pywebio-scope-_groups { display: flex; flex-direction: column; height: auto; }
     #pywebio-scope-navigator { display: flex; flex-wrap: nowrap; overflow-x: auto; padding-bottom: 12px; flex-shrink: 0; }
     #pywebio-scope-navigator > div { flex-shrink: 0; }
@@ -225,10 +247,13 @@ body #input-container.fixed, body.webio-theme-dark #input-container.fixed { box-
     #pywebio-scope-home-about { margin-top: 24px; }
     .overview-view #pywebio-scope-content { overflow: auto; }
     #pywebio-scope-overview { height: auto; overflow: visible; display: block; }
-    #pywebio-scope-scheduler-bar { margin-bottom: 28px; }
+    #pywebio-scope-scheduler-bar { margin-bottom: 16px; }
     #pywebio-scope-overview-body { display: block; }
-    #pywebio-scope-schedulers { grid-template-columns: minmax(0, 1fr); grid-template-rows: auto auto auto; gap: 28px; height: auto; overflow: visible; }
-    #pywebio-scope-running_tasks, #pywebio-scope-pending_tasks, #pywebio-scope-waiting_tasks { max-height: 340px; }
+    #pywebio-scope-schedulers { display: block; height: auto; overflow: visible; }
+    #pywebio-scope-running { margin-bottom: 20px; }
+    #pywebio-scope-task-queues { display: block; overflow: visible; }
+    #pywebio-scope-waiting { margin-top: 20px; }
+    #pywebio-scope-pending_tasks, #pywebio-scope-waiting_tasks { max-height: 400px; overflow-y: auto; }
     #pywebio-scope-logs { height: 360px; margin-top: 28px; }
     [id^="pywebio-scope-overview-task_"] { grid-template-columns: minmax(0, 1fr) auto; align-items: center; }
     [id^="pywebio-scope-overview-task_"] .btn { width: auto; }
