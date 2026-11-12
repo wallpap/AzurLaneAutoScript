@@ -1209,7 +1209,7 @@ class AlasGUI(Frame):
                 put_html(f'<h2>{t("Gui.Workbench.About")}</h2>')
                 put_text(t("Gui.Workbench.FreeSoftware"))
                 put_link(t("Gui.Workbench.Repository"),
-                         url="https://github.com/LmeSzinc/AzurLaneAutoScript", new_window=True)
+                         url="https://github.com/wallpap/AzurLaneAutoScript", new_window=True)
         run_js("document.querySelectorAll('[id^=pywebio-scope-preference-] .btn').forEach("
                "button => button.setAttribute('aria-pressed', button.classList.contains('btn-on')))")
 

@@ -15,6 +15,11 @@ const config = {
   files: [
     'packages/**/dist/**',
   ],
+  publish: {
+    provider: 'github',
+    owner: 'wallpap',
+    repo: 'AzurLaneAutoScript',
+  },
   extraMetadata: {
     version: process.env.VITE_APP_VERSION,
   },

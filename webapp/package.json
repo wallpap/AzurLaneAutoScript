@@ -1,6 +1,10 @@
 {
   "name": "alas",
   "private": true,
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/wallpap/AzurLaneAutoScript.git"
+  },
   "engines": {
     "node": ">=v14.14",
     "npm": ">=7.7"
@@ -23,8 +27,8 @@
     "Chrome 94"
   ],
   "simple-git-hooks": {
-    "pre-commit": "npx lint-staged",
-    "pre-push": "npm run typecheck"
+    "pre-commit": "cd webapp && npx lint-staged",
+    "pre-push": "cd webapp && npm run typecheck"
   },
   "lint-staged": {
     "*.{js,ts,vue}": "eslint --cache --fix"

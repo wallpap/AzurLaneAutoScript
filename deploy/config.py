@@ -11,7 +11,7 @@ class ExecutionError(Exception):
 
 class ConfigModel:
     # Git
-    Repository: str = "https://github.com/LmeSzinc/AzurLaneAutoScript"
+    Repository: str = "https://github.com/wallpap/AzurLaneAutoScript"
     Branch: str = "master"
     GitExecutable: str = "./toolkit/Git/mingw64/bin/git.exe"
     GitProxy: Optional[str] = None
@@ -116,14 +116,18 @@ class DeployConfig(ConfigModel):
         Redirect deploy config, must be called after each `read()`
         """
         if self.Repository in [
+            'global', 'cn',
+            'https://github.com/LmeSzinc/AzurLaneAutoScript',
+            'https://github.com/LmeSzinc/AzurLaneAutoScript.git',
+            'git://git.lyoko.io/AzurLaneAutoScript',
             'https://gitee.com/LmeSzinc/AzurLaneAutoScript',
             'https://gitee.com/lmeszinc/azur-lane-auto-script-mirror',
             'https://e.coding.net/llop18870/alas/AzurLaneAutoScript.git',
             'https://e.coding.net/saarcenter/alas/AzurLaneAutoScript.git',
             'https://git.saarcenter.com/LmeSzinc/AzurLaneAutoScript.git',
         ]:
-            self.Repository = 'git://git.lyoko.io/AzurLaneAutoScript'
-            self.config['Repository'] = 'git://git.lyoko.io/AzurLaneAutoScript'
+            self.Repository = ConfigModel.Repository
+            self.config['Repository'] = ConfigModel.Repository
         if self.PypiMirror in [
             'https://pypi.tuna.tsinghua.edu.cn/simple'
         ]:
@@ -132,14 +136,7 @@ class DeployConfig(ConfigModel):
 
         # Bypass webui.config.DeployConfig.__setattr__()
         # Don't write these into deploy.yaml
-        super().__setattr__(
-            'GitOverCdn',
-            self.Repository == 'git://git.lyoko.io/AzurLaneAutoScript' and self.Branch == 'master'
-        )
-        if self.Repository in ['global']:
-            super().__setattr__('Repository', 'https://github.com/LmeSzinc/AzurLaneAutoScript')
-        if self.Repository in ['cn']:
-            super().__setattr__('Repository', 'git://git.lyoko.io/AzurLaneAutoScript')
+        super().__setattr__('GitOverCdn', False)
 
     def filepath(self, key):
         """
