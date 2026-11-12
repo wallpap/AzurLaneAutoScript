@@ -70,6 +70,7 @@ body.alas-dark {
     outline: 2px solid var(--accent); outline-offset: 3px;
 }
 .btn-aside { display: flex; align-items: center; width: 100%; min-height: 40px; margin: 0; border: 0; border-radius: 6px; padding: 10px 12px 10px 40px; font-size: 13px; line-height: 20px; text-align: left; color: var(--muted); }
+.btn-aside:hover, .btn-aside-active { border: 0; padding: 10px 12px 10px 40px; font-weight: 400; }
 .btn-aside:hover { background: var(--surface-hover); color: var(--text); }
 .btn-aside-active, .btn-aside-active:hover { background: var(--accent-soft); color: var(--accent); font-weight: 600; }
 *[style*="--workspace-entry:"] { position: relative; align-items: center; margin-bottom: 4px; grid-template-columns: minmax(0, 1fr) !important; }
