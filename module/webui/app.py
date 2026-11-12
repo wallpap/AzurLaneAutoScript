@@ -634,17 +634,10 @@ class AlasGUI(Frame):
 
         def put_task(func: Function):
             with use_scope(f"overview-task_{func.command}"):
-                put_column(
-                    [
-                        put_text(t(f"Task.{func.command}.name")).style("--arg-title--"),
-                        put_text(str(func.next_run)).style("--arg-help--"),
-                    ],
-                    size="auto auto",
-                )
                 put_button(
-                    label=t("Gui.Button.Setting"),
-                    onclick=lambda: self.alas_set_group(func.command),
-                    color="off",
+                    label=f"{t(f'Task.{func.command}.name')}\n{func.next_run}",
+                    onclick=partial(self.alas_set_group, func.command),
+                    color="task",
                 )
 
         clear("running_tasks")
