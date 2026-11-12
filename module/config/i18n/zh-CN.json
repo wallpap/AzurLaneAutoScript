@@ -3099,7 +3099,7 @@
       "Manage": "管理"
     },
     "AppManage": {
-      "PageTitle": "管理配置文件",
+      "PageTitle": "配置管理",
       "TitleNew": "添加新配置",
       "NewName": "新的配置文件名",
       "CopyFrom": "从现有的配置中复制",

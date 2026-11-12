@@ -51,7 +51,7 @@ class Frame(Base):
         """
         self.visible = True
         self.page = name
-        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view', 'tool-view')")
+        run_js("document.body.classList.remove('settings-view', 'overview-view', 'home-view', 'tool-view', 'alas-manage')")
         self.task_handler.remove_pending_task()
         clear("content")
         if collapse_menu:

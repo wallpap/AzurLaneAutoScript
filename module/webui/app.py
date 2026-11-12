@@ -145,12 +145,12 @@ class AlasGUI(Frame):
             Icon.SETTING,
             buttons=[
                 {
-                    "label": t("Gui.AddAlas.Manage"),
+                    "label": t("Gui.AppManage.PageTitle"),
                     "value": "AddAlas",
                     "color": "aside",
                 }
             ],
-            onclick=[lambda: go_app("manage", new_window=False)],
+            onclick=[self.ui_manage],
         )
 
 
@@ -730,12 +730,6 @@ class AlasGUI(Frame):
         self.init_menu(collapse_menu=False, name="Develop")
         put_text(t("Gui.Workbench.Application")).style("--navigation-label--")
 
-        put_button(
-            label=t("Gui.MenuDevelop.HomePage"),
-            onclick=self.show,
-            color="menu",
-        ).style(f"--menu-HomePage--: 1;")
-
         # put_button(
         #     label=t("Gui.MenuDevelop.Translate"),
         #     onclick=self.dev_translate,
@@ -769,7 +763,6 @@ class AlasGUI(Frame):
     def dev_update(self) -> None:
         self.init_menu(name="Update")
         self.set_title(t("Gui.MenuDevelop.Update"))
-        put_html(f'<h1 class="page-heading">{t("Gui.MenuDevelop.Update")}</h1>')
         put_html(f'<p class="page-description">{t("Gui.Workbench.UpdateDescription")}</p>')
 
         if State.restart_event is None:
@@ -1015,16 +1008,7 @@ class AlasGUI(Frame):
         self.task_handler.add(remote_switch.g(), delay=1, pending_delete=True)
 
     def ui_develop(self) -> None:
-        if not self.is_mobile:
-            self.show()
-            return
-        self.init_aside(name="Home")
-        self.set_title(t("Gui.Aside.Home"))
-        self.dev_set_menu()
-        self.alas_name = ""
-        if hasattr(self, "alas"):
-            del self.alas
-        self.state_switch.switch()
+        self.show()
 
     def ui_alas(self, config_name: str) -> None:
         if config_name == self.alas_name:
@@ -1039,6 +1023,25 @@ class AlasGUI(Frame):
         self.state_switch.switch()
         self.initial()
         self.alas_set_menu()
+
+    def ui_manage(self) -> None:
+        close_popup()
+        self.init_aside(expand_menu=False, name="AddAlas")
+        self.init_menu(name="Manage")
+        self.alas_name = ""
+        if hasattr(self, "alas"):
+            del self.alas
+        self.state_switch.switch()
+        self.set_status(0)
+        self.set_title(t("Gui.AppManage.PageTitle"))
+        run_js("document.body.classList.add('alas-manage')")
+
+        def refresh_navigation():
+            self.load_home = True
+            self.set_aside()
+            self.active_button("aside", "AddAlas")
+
+        render_config_management(refresh_navigation)
 
     def ui_add_alas(self) -> None:
         with popup(t("Gui.AddAlas.PopupTitle")) as s:
@@ -1092,11 +1095,9 @@ class AlasGUI(Frame):
                 put_buttons(
                     buttons=[
                         {"label": t("Gui.AddAlas.Confirm"), "value": "confirm"},
-                        {"label": t("Gui.AddAlas.Manage"), "value": "manage"},
                     ],
                     onclick=[
                         add,
-                        lambda: go_app("manage", new_window=False),
                     ],
                     scope=s,
                 )
@@ -1107,8 +1108,6 @@ class AlasGUI(Frame):
         with use_scope("home-configurations"):
             put_scope("home-configurations-heading", [
                 put_html(f'<h2>{t("Gui.Workbench.Workspaces")}</h2>'),
-                put_button(t("Gui.AddAlas.Manage"),
-                           onclick=partial(go_app, "manage", new_window=False), color="off"),
             ])
             instances = alas_instance()
             if not instances:
@@ -1211,7 +1210,7 @@ class AlasGUI(Frame):
                 onclick=_disable,
             )
 
-    def run(self) -> None:
+    def run(self, initial_page=None) -> None:
         # setup gui
         set_env(title="Alas", output_animation=False)
         apply_gui_styles(self.theme, self.is_mobile)
@@ -1289,23 +1288,29 @@ class AlasGUI(Frame):
         self.task_handler.start()
 
         # Return to previous page
-        if aside not in ["Home", None]:
+        if initial_page == "Manage" or aside == "AddAlas":
+            self.ui_manage()
+        elif aside in alas_instance():
             self.ui_alas(aside)
 
 
-def app_manage():
+def render_config_management(on_change):
     def _import():
-        resp = file_upload(
+        resp = input_group(
             label=t("Gui.AppManage.Import"),
-            placeholder=t("Gui.Text.ChooseFile"),
-            help_text=t("Gui.AppManage.OverrideWarning"),
-            accept=".json",
-            required=False,
-            max_size="1M",
+            inputs=[file_upload(
+                name="config",
+                placeholder=t("Gui.Text.ChooseFile"),
+                help_text=t("Gui.AppManage.OverrideWarning"),
+                accept=".json",
+                required=True,
+                max_size="1M",
+            )],
+            cancelable=True,
         )
-
         if resp is None:
             return
+        resp = resp["config"]
 
         file: bytes = resp["content"]
         file_name: str = resp["filename"]
@@ -1322,6 +1327,7 @@ def app_manage():
         State.config_updater.write_file(config_name, config, mod_name)
         toast(t("Gui.AppManage.ImportSuccess"), color="success")
 
+        on_change()
         _show_table()
 
     def _export(config_name: str):
@@ -1379,6 +1385,7 @@ def app_manage():
         r = load_config(origin).read_file(origin)
         State.config_updater.write_file(config_name, r, get_config_mod(origin))
         toast(t("Gui.AppManage.NewSuccess"), color="success")
+        on_change()
         _show_table()
 
     def _show_table():
@@ -1416,25 +1423,7 @@ def app_manage():
             scope="config_table",
         )
 
-    set_env(title="Alas", output_animation=False)
-    apply_gui_styles(State.theme, info.user_agent.is_mobile)
-    Frame._show()
-    Frame.set_title(t("Gui.AppManage.PageTitle"))
-    run_js("document.body.classList.add('alas-manage')")
-    with use_scope("aside"):
-        put_icon_buttons(
-            Icon.DEVELOP,
-            buttons=[{"label": t("Gui.Aside.Home"), "value": "Home", "color": "aside"}],
-            onclick=[partial(go_app, "index", new_window=False)],
-        )
-        put_icon_buttons(
-            Icon.SETTING,
-            buttons=[{"label": t("Gui.AddAlas.Manage"), "value": "AddAlas", "color": "aside"}],
-            onclick=[lambda: None],
-        )
-    Frame.active_button("aside", "AddAlas")
     put_scope("manage-page", scope="content")
-    put_html(f'<h1 class="page-heading">{t("Gui.AppManage.PageTitle")}</h1>', scope="manage-page")
     put_html(f'<p class="page-description">{t("Gui.Workbench.ManageDescription")}</p>', scope="manage-page")
     put_scope("manage-actions", scope="manage-page")
     put_scope("config_table", scope="manage-page")
@@ -1446,12 +1435,10 @@ def app_manage():
                 "disabled": IS_ON_PHONE_CLOUD,
             },
             {"label": t("Gui.AppManage.Import"), "value": "import", "color": "off"},
-            {"label": t("Gui.AppManage.Back"), "value": "back", "color": "off"},
         ],
         onclick=[
             (lambda: None) if IS_ON_PHONE_CLOUD else _new,
             _import,
-            partial(go_app, "index", new_window=False),
         ],
         scope="manage-actions",
     )
@@ -1562,7 +1549,9 @@ def app():
             time.sleep(1.5)
             run_js("location.reload();")
             return
-        app_manage()
+        gui = AlasGUI()
+        local.gui = gui
+        gui.run(initial_page="Manage")
 
     app = asgi_app(
         applications=[index, manage],
