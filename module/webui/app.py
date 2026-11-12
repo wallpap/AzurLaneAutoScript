@@ -70,8 +70,7 @@ from module.webui.utils import (
     Icon,
     Switch,
     TaskHandler,
-    add_css,
-    filepath_css,
+    apply_gui_styles,
     get_alas_config_listen_path,
     get_localstorage,
     get_window_visibility_state,
@@ -1198,16 +1197,7 @@ class AlasGUI(Frame):
     def run(self) -> None:
         # setup gui
         set_env(title="Alas", output_animation=False)
-        add_css(filepath_css("alas"))
-        if self.is_mobile:
-            add_css(filepath_css("alas-mobile"))
-        else:
-            add_css(filepath_css("alas-pc"))
-
-        if self.theme == "dark":
-            add_css(filepath_css("dark-alas"))
-        else:
-            add_css(filepath_css("light-alas"))
+        apply_gui_styles(self.theme, self.is_mobile)
 
         # Auto refresh when lost connection
         # [For develop] Disable by run `reload=0` in console

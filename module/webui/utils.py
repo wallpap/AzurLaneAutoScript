@@ -368,9 +368,19 @@ def filepath_icon(filename):
 
 
 def add_css(filepath):
-    with open(filepath, "r") as f:
-        css = f.read().replace("\n", "")
-        run_js(f"""$('head').append('<style>{css}</style>')""")
+    with open(filepath, "r", encoding="utf-8") as f:
+        css = f.read()
+    run_js("$('<style>').text(css).appendTo('head')", css=css)
+
+
+def apply_gui_styles(theme, is_mobile):
+    for name in ("alas", "alas-mobile" if is_mobile else "alas-pc",
+                 "dark-alas" if theme == "dark" else "light-alas", "workbench"):
+        add_css(filepath_css(name))
+    run_js("document.body.classList.toggle('alas-dark', dark);"
+           "document.body.classList.toggle('alas-mobile', mobile);"
+           "document.body.classList.toggle('alas-electron', electron);",
+           dark=theme == "dark", mobile=is_mobile, electron=State.electron)
 
 
 def _read(path):
