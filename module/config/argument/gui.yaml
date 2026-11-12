@@ -2,6 +2,16 @@
 # This will insert to `config/i18n/{lang}.json`, under key `Gui`
 
 Workbench:
+  Navigation:
+  Workspaces:
+  TasksSettings:
+  SearchTasks:
+  NoSearchResults:
+  Application:
+  OverviewDescription:
+  OpenConfiguration:
+  NoConfigurations:
+  Preferences:
   Title:
   Description:
   Language:

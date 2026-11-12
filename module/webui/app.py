@@ -5,6 +5,7 @@ import threading
 import time
 from datetime import datetime
 from functools import partial
+from html import escape
 from typing import Dict, List, Optional
 
 # Import fake module before import pywebio to avoid importing unnecessary module PIL
@@ -129,6 +130,7 @@ class AlasGUI(Frame):
         if current_date.month == 4 and current_date.day == 1:
             self.af_flag = True
 
+        put_text(t("Gui.Workbench.Workspaces")).style("--navigation-label--")
         put_icon_buttons(
             Icon.DEVELOP,
             buttons=[{"label": t("Gui.Aside.Home"), "value": "Home", "color": "aside"}],
@@ -231,6 +233,13 @@ class AlasGUI(Frame):
         """
         Set menu
         """
+        put_text(t("Gui.Workbench.TasksSettings")).style("--navigation-label--")
+        put_html(
+            f'<input id="task-search" class="task-search" type="search" '
+            f'placeholder="{escape(t("Gui.Workbench.SearchTasks"), quote=True)}" '
+            f'aria-label="{escape(t("Gui.Workbench.SearchTasks"), quote=True)}">'
+        )
+        put_html(f'<p id="task-search-empty" hidden>{escape(t("Gui.Workbench.NoSearchResults"))}</p>')
         put_buttons(
             [
                 {
@@ -240,7 +249,7 @@ class AlasGUI(Frame):
                 }
             ],
             onclick=[self.alas_overview],
-        ).style(f"--menu-Overview--")
+        ).style(f"--menu-Overview--: 1;")
 
         for menu, task_data in self.ALAS_MENU.items():
             if task_data.get("page") == "tool":
@@ -259,7 +268,7 @@ class AlasGUI(Frame):
                             }
                         ],
                         onclick=_onclick,
-                    ).style(f"--menu-{task}--")
+                    ).style(f"--menu-{task}--: 1;")
                     for task in task_data.get("tasks", [])
                 ]
                 put_collapse(title=t(f"Menu.{menu}.name"), content=task_btn_list)
@@ -282,8 +291,43 @@ class AlasGUI(Frame):
                             }
                         ],
                         onclick=_onclick,
-                    ).style(f"--menu-{task}--").style(f"padding-left: 0.75rem")
+                    ).style(f"--menu-{task}--: 1;").style(f"padding-left: 0.75rem")
 
+        run_js("""
+            const search = document.getElementById('task-search');
+            const menu = document.getElementById('pywebio-scope-menu');
+            search.addEventListener('input', () => {
+                const query = search.value.trim().toLocaleLowerCase();
+                let matches = 0;
+                menu.querySelectorAll('details').forEach(group => {
+                    if (!group.dataset.searching && query) {
+                        group.dataset.wasOpen = group.open ? '1' : '0';
+                        group.dataset.searching = '1';
+                    }
+                    let visible = false;
+                    group.querySelectorAll('button.btn-menu').forEach(button => {
+                        const match = !query || button.textContent.toLocaleLowerCase().includes(query);
+                        button.parentElement.hidden = !match;
+                        visible = visible || match;
+                        if (match) matches++;
+                    });
+                    group.hidden = !visible;
+                    if (query) group.open = visible;
+                    else if (group.dataset.searching) {
+                        group.open = group.dataset.wasOpen === '1';
+                        delete group.dataset.searching;
+                    }
+                });
+                // 非折叠菜单中的任务也参与过滤，保留总览入口。
+                menu.querySelectorAll('button.btn-menu').forEach(button => {
+                    if (button.closest('details') || button.closest('[style*="--menu-Overview--"]')) return;
+                    const match = !query || button.textContent.toLocaleLowerCase().includes(query);
+                    button.parentElement.hidden = !match;
+                    if (match) matches++;
+                });
+                document.getElementById('task-search-empty').hidden = !query || matches > 0;
+            });
+        """)
         self.alas_overview()
 
     @use_scope("content", clear=True)
@@ -292,9 +336,13 @@ class AlasGUI(Frame):
         Set arg groups from dict
         """
         self.init_menu(name=task)
+        run_js("document.body.classList.add('settings-view')")
         self.set_title(t(f"Task.{task}.name"))
-
-        put_scope("_groups", [put_none(), put_scope("groups"), put_scope("navigator")])
+        put_scope("settings-heading", [
+            put_text(self.alas_name).style("--context-name--"),
+            put_html(f'<h1 class="page-heading">{escape(t(f"Task.{task}.name"))}</h1>'),
+        ])
+        put_scope("_groups", [put_scope("navigator"), put_scope("groups")])
 
         task_help: str = t(f"Task.{task}.help")
         if task_help:
@@ -396,10 +444,11 @@ class AlasGUI(Frame):
     @use_scope("navigator")
     def set_navigator(self, group):
         js = f"""
-            $("#pywebio-scope-groups").scrollTop(
-                $("#pywebio-scope-group_{group[0]}").position().top
-                + $("#pywebio-scope-groups").scrollTop() - 59
-            )
+            const target = document.getElementById('pywebio-scope-group_{group[0]}');
+            const container = document.getElementById(window.matchMedia('(max-width: 760px)').matches
+                ? 'pywebio-scope-content' : 'pywebio-scope-groups');
+            container.scrollTop += target.getBoundingClientRect().top
+                - container.getBoundingClientRect().top - 12;
         """
         put_button(
             label=t(f"{group[0]}._info.name"),
@@ -410,24 +459,28 @@ class AlasGUI(Frame):
     @use_scope("content", clear=True)
     def alas_overview(self) -> None:
         self.init_menu(name="Overview")
+        run_js("document.body.classList.add('overview-view')")
         self.set_title(t(f"Gui.MenuAlas.Overview"))
-
-        put_scope("overview", [put_scope("schedulers"), put_scope("logs")])
-
-        with use_scope("schedulers"):
+        put_scope("overview", [put_scope("scheduler-bar"), put_scope("overview-body", [
+            put_scope("schedulers"), put_scope("logs"),
+        ])])
+        with use_scope("scheduler-bar"):
             put_scope(
-                "scheduler-bar",
+                "overview-heading",
                 [
-                    put_text(t("Gui.Overview.Scheduler")).style(
-                        "font-size: 1.25rem; margin: auto .5rem auto;"
-                    ),
-                    put_scope("scheduler_btn"),
+                    put_text(self.alas_name).style("--context-name--"),
+                    put_html(f'<h1 class="page-heading">{t("Gui.MenuAlas.Overview")}</h1>'),
+                    put_text(t("Gui.Workbench.OverviewDescription")).style("--section-description--"),
                 ],
             )
+            put_scope("overview-actions", [
+                put_scope("overview-state"), put_scope("scheduler_btn"),
+            ])
+        with use_scope("schedulers"):
             put_scope(
                 "running",
                 [
-                    put_text(t("Gui.Overview.Running")),
+                    put_scope("running-heading", [put_text(t("Gui.Overview.Running")), put_scope("running-count")]),
                     put_html('<hr class="hr-group">'),
                     put_scope("running_tasks"),
                 ],
@@ -435,7 +488,7 @@ class AlasGUI(Frame):
             put_scope(
                 "pending",
                 [
-                    put_text(t("Gui.Overview.Pending")),
+                    put_scope("pending-heading", [put_text(t("Gui.Overview.Pending")), put_scope("pending-count")]),
                     put_html('<hr class="hr-group">'),
                     put_scope("pending_tasks"),
                 ],
@@ -443,7 +496,7 @@ class AlasGUI(Frame):
             put_scope(
                 "waiting",
                 [
-                    put_text(t("Gui.Overview.Waiting")),
+                    put_scope("waiting-heading", [put_text(t("Gui.Overview.Waiting")), put_scope("waiting-count")]),
                     put_html('<hr class="hr-group">'),
                     put_scope("waiting_tasks"),
                 ],
@@ -600,6 +653,11 @@ class AlasGUI(Frame):
             running = []
             pending = []
         waiting = self.alas_config.waiting_task
+        for name, tasks in (("running", running), ("pending", pending), ("waiting", waiting)):
+            with use_scope(f"{name}-count", clear=True):
+                put_text(str(len(tasks)))
+        with use_scope("overview-state", clear=True):
+            put_text(t("Gui.Status.Running" if self.alas.alive else "Gui.Status.Inactive"))
 
         def put_task(func: Function):
             with use_scope(f"overview-task_{func.command}"):
@@ -746,36 +804,37 @@ class AlasGUI(Frame):
     @use_scope("menu", clear=True)
     def dev_set_menu(self) -> None:
         self.init_menu(collapse_menu=False, name="Develop")
+        put_text(t("Gui.Workbench.Application")).style("--navigation-label--")
 
         put_button(
             label=t("Gui.MenuDevelop.HomePage"),
             onclick=self.show,
             color="menu",
-        ).style(f"--menu-HomePage--")
+        ).style(f"--menu-HomePage--: 1;")
 
         # put_button(
         #     label=t("Gui.MenuDevelop.Translate"),
         #     onclick=self.dev_translate,
         #     color="menu",
-        # ).style(f"--menu-Translate--")
+        # ).style(f"--menu-Translate--: 1;")
 
         put_button(
             label=t("Gui.MenuDevelop.Update"),
             onclick=self.dev_update,
             color="menu",
-        ).style(f"--menu-Update--")
+        ).style(f"--menu-Update--: 1;")
 
         put_button(
             label=t("Gui.MenuDevelop.Remote"),
             onclick=self.dev_remote,
             color="menu",
-        ).style(f"--menu-Remote--")
+        ).style(f"--menu-Remote--: 1;")
 
         put_button(
             label=t("Gui.MenuDevelop.Utils"),
             onclick=self.dev_utils,
             color="menu",
-        ).style(f"--menu-Utils--")
+        ).style(f"--menu-Utils--: 1;")
 
     def dev_translate(self) -> None:
         go_app("translate", new_window=True)
@@ -1120,6 +1179,26 @@ class AlasGUI(Frame):
 
             put()
 
+    def render_home_configurations(self) -> None:
+        with use_scope("home-configurations"):
+            put_scope("home-configurations-heading", [
+                put_html(f'<h2>{t("Gui.Workbench.Workspaces")}</h2>'),
+                put_button(t("Gui.AddAlas.Manage"),
+                           onclick=partial(go_app, "manage", new_window=False), color="off"),
+            ])
+            instances = alas_instance()
+            if not instances:
+                put_text(t("Gui.Workbench.NoConfigurations"))
+            put_scope("home-configurations-list")
+        for index, name in enumerate(instances):
+            with use_scope("home-configurations-list"):
+                put_scope(f"home-configuration-{index}")
+            with use_scope(f"home-configuration-{index}"):
+                put_text(get_config_mod(name)).style("--configuration-plugin--")
+                put_html(f'<h3>{escape(name)}</h3>')
+                put_button(t("Gui.Workbench.OpenConfiguration"),
+                           onclick=partial(self.ui_alas, name), color="off")
+
     def show(self) -> None:
         self._show()
         self.load_home = True
@@ -1140,6 +1219,7 @@ class AlasGUI(Frame):
         self.init_aside(name="Home")
         self.dev_set_menu()
         self.init_menu(name="HomePage")
+        run_js("document.body.classList.add('home-view')")
         self.alas_name = ""
         if hasattr(self, "alas"):
             del self.alas
@@ -1158,6 +1238,10 @@ class AlasGUI(Frame):
         with use_scope("home-page"):
             put_html(f'<h1 class="page-heading">{t("Gui.Workbench.Title")}</h1>')
             put_html(f'<p class="page-description">{t("Gui.Workbench.Description")}</p>')
+            put_scope("home-main", [put_scope("home-configurations"), put_scope("home-preferences")])
+            self.render_home_configurations()
+        with use_scope("home-preferences"):
+            put_html(f'<h2>{t("Gui.Workbench.Preferences")}</h2>')
             with use_scope("preference-language"):
                 put_html(f'<h2>{t("Gui.Workbench.Language")}</h2>')
                 put_buttons(
@@ -1180,6 +1264,7 @@ class AlasGUI(Frame):
                     ],
                     onclick=set_theme,
                 )
+        with use_scope("home-page"):
             with use_scope("home-about"):
                 put_html(f'<h2>{t("Gui.Workbench.About")}</h2>')
                 put_text(t("Gui.Workbench.FreeSoftware"))

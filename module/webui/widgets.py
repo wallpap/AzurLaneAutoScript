@@ -273,15 +273,15 @@ def put_icon_buttons(
         onclick: Union[List[Callable[[], None]], Callable[[], None]],
 ) -> Output:
     value = buttons[0]["value"]
-    return put_column(
+    return put_row(
         [
             output(put_html(icon_html)).style(
-                "z-index: 1; margin-left: 8px;text-align: center"
+                "--workspace-icon: 1;"
             ),
-            put_buttons(buttons, onclick).style(f"z-index: 2; --aside-{value}--;"),
+            put_buttons(buttons, onclick).style(f"z-index: 2; --aside-{value}--: 1;"),
         ],
-        size="0",
-    )
+        size="24px 1fr",
+    ).style("--workspace-entry: 1;")
 
 
 def put_none() -> Output:
