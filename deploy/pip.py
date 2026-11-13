@@ -123,6 +123,11 @@ class PipManager(DeployConfig):
             logger.info('InstallDependencies is disabled, skip')
             return
 
+        if self.RequirementsFile == 'requirements.txt':
+            from deploy.uv import sync_dependencies
+            sync_dependencies(self)
+            return
+
         if not len(self.set_dependency_to_install):
             logger.info('All dependencies installed')
             return

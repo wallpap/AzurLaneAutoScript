@@ -1,6 +1,6 @@
-import {node} from '../../electron-vendors.config.json';
-import {join} from 'path';
-import {builtinModules} from 'module';
+const {node} = require('../../electron-vendors.config.json');
+const {join} = require('path');
+const {builtinModules} = require('module');
 
 const PACKAGE_ROOT = __dirname;
 
@@ -13,6 +13,7 @@ const config = {
   mode: process.env.MODE,
   root: PACKAGE_ROOT,
   envDir: process.cwd(),
+  define: {'process.env': 'process.env'},
   resolve: {
     alias: {
       '/@/': join(PACKAGE_ROOT, 'src') + '/',
@@ -50,4 +51,4 @@ const config = {
   },
 };
 
-export default config;
+module.exports = config;

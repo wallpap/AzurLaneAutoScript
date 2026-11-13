@@ -1,6 +1,6 @@
-import {chrome} from '../../electron-vendors.config.json';
-import {join} from 'path';
-import {builtinModules} from 'module';
+const {chrome} = require('../../electron-vendors.config.json');
+const {join} = require('path');
+const {builtinModules} = require('module');
 
 const PACKAGE_ROOT = __dirname;
 
@@ -48,4 +48,4 @@ const config = {
   },
 };
 
-export default config;
+module.exports = config;

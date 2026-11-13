@@ -11,6 +11,7 @@ export class PyShell extends PythonShell {
       args: args,
       pythonPath: pythonPath,
       scriptPath: alasPath,
+      cwd: alasPath,
     };
     super(script, options);
   }

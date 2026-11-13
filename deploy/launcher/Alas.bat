@@ -3,7 +3,8 @@
 
 set "_root=%~dp0"
 set "_root=%_root:~0,-1%"
-cd "%_root%"
+if not exist "%_root%\pyproject.toml" set "_root=%~dp0..\.."
+cd /d "%_root%"
 echo "%_root%
 
 color F0
@@ -14,9 +15,18 @@ set "_adbBin=%_root%\toolkit\Lib\site-packages\adbutils\binaries"
 set "PATH=%_root%\toolkit\alias;%_root%\toolkit\command;%_pyBin%;%_pyBin%\Scripts;%_GitBin%;%_adbBin%;%PATH%"
 
 title Alas Updater
-python -m deploy.installer
+uv sync --locked --no-dev --inexact
+if %errorlevel% neq 0 (
+    pause >nul
+    exit /b 1
+)
+uv run --locked --no-sync python -m deploy.installer
 if %errorlevel% neq 0 (
     pause >nul
 ) else (
-    start "Alas" "%_root%\toolkit\webapp\alas.exe"
+    if exist "%_root%\webapp\dist\win-unpacked\alas.exe" (
+        start "Alas" "%_root%\webapp\dist\win-unpacked\alas.exe"
+    ) else (
+        start "Alas" "%_root%\toolkit\webapp\alas.exe"
+    )
 )

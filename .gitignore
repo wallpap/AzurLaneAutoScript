@@ -15,7 +15,9 @@ dev_tools/debug_tools
 /collection/
 /campaign/test/
 /toolkit
+/Alas.exe
 *.lock
+!uv.lock
 config/reloadflag
 config/reloadalas
 test.py
@@ -178,9 +180,6 @@ target/
 # IPython
 profile_default/
 ipython_config.py
-
-# pyenv
-.python-version
 
 # pipenv
 #   According to pypa/pipenv#598, it is recommended to include Pipfile.lock in version control.

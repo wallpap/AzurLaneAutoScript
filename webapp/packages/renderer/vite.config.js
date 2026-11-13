@@ -1,9 +1,9 @@
 /* eslint-env node */
 
-import {chrome} from '../../electron-vendors.config.json';
-import {join} from 'path';
-import {builtinModules} from 'module';
-import vue from '@vitejs/plugin-vue';
+const {chrome} = require('../../electron-vendors.config.json');
+const {join} = require('path');
+const {builtinModules} = require('module');
+const vue = require('@vitejs/plugin-vue');
 
 const PACKAGE_ROOT = __dirname;
 
@@ -14,6 +14,7 @@ const PACKAGE_ROOT = __dirname;
 const config = {
   mode: process.env.MODE,
   root: PACKAGE_ROOT,
+  define: {'process.env': 'process.env'},
   resolve: {
     alias: {
       '/@/': join(PACKAGE_ROOT, 'src') + '/',
@@ -48,4 +49,4 @@ const config = {
   },
 };
 
-export default config;
+module.exports = config;

@@ -49,6 +49,25 @@ GUI development, thanks **[@18870](https://github.com/18870)** , say HURRAY.
 
 [设备支持文档](https://github.com/LmeSzinc/AzurLaneAutoScript/wiki/Emulator_cn)，包含模拟器运行、云手机运行以及解锁各种骚方式运行。
 
+### 使用 uv 管理源码环境
+
+安装 uv 后，在项目根目录执行：
+
+```sh
+uv sync --locked
+uv run python gui.py
+```
+
+uv 自动安装 Python 3.8 并创建 `.venv`。当前 OCR 引擎依赖 NumPy 1.19，项目固定使用 Python 3.8；Windows 和 Linux x86-64 环境使用同一份 `uv.lock`。仅运行应用时可用 `uv sync --locked --no-dev`。
+
+MXNet 1.6 的 Windows wheel 声明了比 Linux wheel 更旧的 NumPy 和 requests 上限；`pyproject.toml` 为解析器统一采用 Linux wheel 的依赖范围，保留原有 OCR API。`uv pip check` 在 Windows 仍会按 wheel 原始元数据报告这两项上限。
+
+Windows 桌面端在默认的 `PythonExecutable: ./toolkit/python.exe` 配置下，优先使用已创建的 `.venv`，自定义 Python 路径仍按配置执行。运行 `deploy/launcher/Alas.bat` 会先同步依赖，再启动更新器和桌面应用。GUI 内置更新器也使用 `uv sync --locked`。
+
+Windows 桌面打包：在 `webapp` 目录运行 `npm run package:win`，生成项目根目录的 `Alas.exe` 和 `webapp/dist/Alas-desktop-版本-win-x64.zip`。双击根目录 `Alas.exe` 即可打开桌面界面；快捷方式无需指定工作目录。桌面压缩包需解压到完整源码目录，首次运行缺少 Python 环境时会通过已安装的 uv 自动安装依赖。
+
+依赖以 `pyproject.toml` 为准，使用 `uv add`、`uv remove` 或 `uv lock --upgrade-package 包名` 修改，然后运行 `uv run python -m dev_tools.requirements_updater`，同步生成供旧安装方式及特殊平台使用的 requirements 文件。开发测试使用 `uv run python -m pytest`，桌面前端继续通过 `webapp` 目录下的 npm 管理。
+
 
 
 ## 正确地使用调度器
