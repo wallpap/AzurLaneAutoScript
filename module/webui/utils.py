@@ -379,7 +379,7 @@ def apply_gui_styles(theme, is_mobile):
         add_css(filepath_css(name))
     run_js("document.body.classList.toggle('alas-dark', dark);"
            "document.body.classList.toggle('alas-mobile', mobile);"
-           "document.body.classList.toggle('alas-electron', electron);",
+           "document.body.classList.toggle('alas-electron', electron || navigator.userAgent.includes('Electron/'));",
            dark=theme == "dark", mobile=is_mobile, electron=State.electron)
 
 
